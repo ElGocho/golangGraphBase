@@ -14,8 +14,8 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) 
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) Ping(ctx context.Context) (bool, error) {
+	return true, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

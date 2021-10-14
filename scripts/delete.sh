@@ -1,5 +1,5 @@
 echo "Eliminando servicio"
-rm ../builds/alamano_service -y
+rm ../builds/sa_service -y
 echo "Eliminado"
 ls ../builds
 

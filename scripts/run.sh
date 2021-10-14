@@ -1,5 +1,5 @@
 echo "Corriendo el servicio"
 
-builds/alamano_service
+builds/sa_service
 
 
