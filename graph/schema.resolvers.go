@@ -4,10 +4,10 @@ package graph
 // will be copied through when generating and any unknown code will be moved to the end.
 
 import (
-	"alm_web_service/graph/generated"
-	"alm_web_service/graph/model"
 	"context"
 	"fmt"
+	"sa_web_service/graph/generated"
+	"sa_web_service/graph/model"
 )
 
 func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {

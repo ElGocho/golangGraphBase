@@ -1,4 +1,4 @@
-module alm_web_service
+module sa_web_service
 
 go 1.13
 
