@@ -2,12 +2,16 @@ version: "3.7"
 
 services:
 
-  alamano_service:
+  sys_app_service:
     image: golang:1.17.2-alpine
     ports:
       - 8080:8080
     volumes:
       - ./:/app
+      - ./pkg:/go/pkg
     command: >
-      sh -c "cd /app && sh scripts/build.sh && sh scripts/run.sh"
+      sh -c "cd /app && 
+            sh scripts/generate.sh &&
+            sh scripts/build.sh &&
+            sh scripts/run.sh"
   
