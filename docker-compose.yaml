@@ -14,4 +14,4 @@ services:
             sh scripts/generate.sh &&
             sh scripts/build.sh &&
             sh scripts/run.sh"
-  
+ 

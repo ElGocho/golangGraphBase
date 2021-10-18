@@ -7,6 +7,13 @@
 pkg/*
 builds/*
 
+#file not ignored
+!pkg/mod/github.com/99designs
+!pkg/mod/github.com/gorilla
+!pkg/mod/github.com/hashicorp
+!pkg/mod/github.com/mitchellh
+!pkg/mod/github.com/vektah
+
 # Node artifact files
 node_modules/
 dist/
