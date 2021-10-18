@@ -1,8 +1,7 @@
 version: "3.7"
 
 services:
-
-  sys_app_service:
+  sysAppService:
     image: golang:1.17.2-alpine
     ports:
       - 8080:8080
@@ -13,5 +12,18 @@ services:
       sh -c "cd /app && 
             sh scripts/generate.sh &&
             sh scripts/build.sh &&
-            sh scripts/run.sh"
- 
+            sh scripts/run.sh" 
+  postgreSQL:
+    image: postgres
+    hostname: postgres 
+    restart: always
+    volumes:
+      - ./pem/pgdata:/var/lib/postgresql/data
+      - ./pem:/pem
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=secret_password
+      - POSTGRES_USER=usuario
+      - POSTGRES_DB=miBD
+
