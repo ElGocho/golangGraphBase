@@ -6,6 +6,7 @@
 #file of system
 pkg/*
 builds/*
+pem/*
 
 #file not ignored
 !pkg/mod/github.com/99designs
