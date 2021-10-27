@@ -13,6 +13,11 @@ services:
             sh scripts/generate.sh &&
             sh scripts/build.sh &&
             sh scripts/run.sh" 
+    depends_on:
+      - "postgreSQL"
+    links:
+      - postgreSQL 
+    network_mode: bridge
   postgreSQL:
     image: postgres
     hostname: postgres 
@@ -21,9 +26,9 @@ services:
       - ./pem/pgdata:/var/lib/postgresql/data
       - ./pem:/pem
     ports:
-      - "5432:5432"
+      - "54322:5432"
     environment:
       - POSTGRES_PASSWORD=secret_password
       - POSTGRES_USER=usuario
       - POSTGRES_DB=miBD
-
+    network_mode: bridge
