@@ -7,7 +7,7 @@ services:
       - 8080:8080
     volumes:
       - ./:/app
-      - ./pkg:/go/pkg
+      - ./pem/pkg:/go/pkg
     command: >
       sh -c "cd /app && 
             sh scripts/generate.sh &&
