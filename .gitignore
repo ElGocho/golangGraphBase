@@ -9,6 +9,8 @@ builds/*
 pem/*
 logs/*
 
+.env
+
 #file not ignored
 !pkg/mod/github.com/99designs
 !pkg/mod/github.com/gorilla
