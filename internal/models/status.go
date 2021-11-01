@@ -10,8 +10,28 @@ type IState struct{
 	Name	string	`gorm:"->;not null;type:varchar(50)"`
 	Code	string	`gorm:"->;unique;not null;type:varchar(25)"`
 	Status	bool	`gorm:"->;not null;default:true"`
+
+	TableID	uint	`gorm:"->;not null;"`
+
+	Table	ITable	`gorm:"->"`
 }
 
-func (model *IState) getFromDB(db *gorm.DB) *gorm.DB{
-	return db.Model(model)
+type WState struct{
+	ID uint `gorm:"primaryKey;<-"`
+	Name	string	`gorm:"<-;not null;type:varchar(50)"`
+	Code	string	`gorm:"<-;unique;not null;type:varchar(25)"`
+	Status	bool	`gorm:"<-;not null;default:true"`
+
+	TableID	uint	`gorm:"<-;not null;"`
 }
+
+func (model *WState) TableName() string {
+	return "i_states"
+}
+
+func (model *IState) Get(db *gorm.DB, builder *Builder) *gorm.DB{
+	BuilderORMQuery(db, builder)
+
+	return db.First(model)
+}
+

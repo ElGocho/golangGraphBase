@@ -2,6 +2,9 @@ package models
 
 import (
 	"gorm.io/gorm"
+	"github.com/google/uuid"
+
+	"sa_web_service/internal/helpers"
 )
 
 type User struct {
@@ -16,12 +19,36 @@ type User struct {
 	RoleID	uint	`gorm:"not null"`
 	TableID	uint	`gorm:"not null"`
 
-	State	IState `gorm:"foreignKey:StateID"`
-	Role	IRole	`gorm:"foreignKey:RoleID"`
-	Table	ITable	`gorm:"foreignKey:TableID"`
+	State	IState `gorm:"foreignKey:StateID;->"`
+	Role	IRole	`gorm:"foreignKey:RoleID;->"`
+	Table	ITable	`gorm:"foreignKey:TableID;->"`
 }
 
 
-func (model *User) getFromDB(db *gorm.DB) *gorm.DB{
-	return db.Model(model)
+func (model *User) BeforeCreate(tx *gorm.DB) (err error){
+	model.ID = uuid.New()
+	
+	if model.Password != "" {
+		hash, err := helpers.Encrypt(model.Password)
+
+		if err != nil {
+			return err
+		}
+
+		model.Password = hash
+	}
+
+	return 
 }
+
+func (model *User) Get(db *gorm.DB, builder *Builder) *gorm.DB{
+	BuilderORMQuery(db, builder)
+
+	return db.First(model)
+}
+
+func (model *User) Create(db *gorm.DB) *gorm.DB{
+	return db.Create(model)
+}
+
+

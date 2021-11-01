@@ -2,6 +2,8 @@ package models
 
 import (
 	"gorm.io/gorm"
+
+	"sa_web_service/internal/models/const"
 )
 
 type ILanguage struct {
@@ -23,7 +25,7 @@ type WLanguage struct {
 }
 
 func (model *WLanguage) TableName() string {
-	return "i_languages"
+	return string(cons.TableLanguages)
 }
 
 func (model *ILanguage) getFromDB(db *gorm.DB) *gorm.DB{

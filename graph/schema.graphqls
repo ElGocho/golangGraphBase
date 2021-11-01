@@ -8,9 +8,30 @@ type Query {
 
 type Mutation {
   ping2: Boolean!
+
+  register(input:RegisterInput!):User!
 }
 
 
 type User {
+  id: ID!
   name: String!
+  email: String!
+  identification: String!
+  image: String!
+  password: String!
+  role_id: Int!
+}
+
+input RegisterInput{
+  user: UserInput!
+}
+
+input UserInput{
+  name: String!
+  email: String!
+  identification: String!
+  image: String!
+  password: String!
+  role_id: Int!
 }
