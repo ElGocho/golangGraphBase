@@ -4,8 +4,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func Encrypt(cadena string) (string,error){
+func Hash(cadena string) (string,error){
 	bytes, err := bcrypt.GenerateFromPassword([]byte(cadena), bcrypt.DefaultCost)
 
 	return string(bytes), err
+}
+
+
+func CompareHash(hash, cadena string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(cadena))
 }

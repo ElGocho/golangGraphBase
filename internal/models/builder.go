@@ -7,7 +7,12 @@ import (
 type Builder struct {
 	Table	string	`json:"table"`
 	Select	interface{} `json:"select"`
-	Where	[]interface{}	`json:"where"`
+	Where	[]Where	`json:"where"`
+}
+
+type Where struct {
+	Condition interface{}
+	Params []interface{}
 }
 
 
@@ -24,6 +29,7 @@ func BuilderORMQuery(db *gorm.DB, builder *Builder){
 
 	BuilderORMSelect(db, builder)
 
+	BuilderORMWhere(db, builder)
 }
 
 func BuilderORMTable(db *gorm.DB, builder *Builder){
@@ -40,6 +46,16 @@ func BuilderORMSelect(db *gorm.DB, builder *Builder) {
 	}
 
 	db = db.Select(builder.Select)
+}
+
+func BuilderORMWhere(db *gorm.DB, builder *Builder){
+	if(builder == nil ){
+		return
+	}
+
+	for _,w := range builder.Where {
+		db = db.Where(w.Condition, w.Params...)	
+	} 
 }
 
 

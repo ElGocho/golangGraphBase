@@ -11,10 +11,12 @@ func RegisterUser(tx *gorm.DB, user *models.User) (*models.User, error){
 	db := models.NewSession(tx)
 
 	builder := &models.Builder{
-			Select: "id",
-			Where: []interface{}{
-				models.ITable{ Code: string(cons.TableUsers)},
+		Select: "id",
+		Where: []models.Where{
+			{
+				Condition: models.ITable{ Code: string(cons.TableUsers)},
 			},
+		},
 	}
 
 	err := user.Table.Get(db, builder).Error
@@ -27,10 +29,12 @@ func RegisterUser(tx *gorm.DB, user *models.User) (*models.User, error){
 
 	builder = &models.Builder{
 		Select: "id",
-		Where: []interface{}{
-			models.IState{ 
-				Code: string(cons.StateActUser),
-				TableID: user.TableID,
+		Where: []models.Where{
+			{
+				Condition: models.IState{ 
+					Code: string(cons.StateActUser),
+					TableID: user.TableID,
+				},
 			},
 		},
 	}

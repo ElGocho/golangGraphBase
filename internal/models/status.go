@@ -6,23 +6,23 @@ import (
 
 
 type IState struct{
-	ID uint `gorm:"primaryKey;->"`
+	ID uint `gorm:"primaryKey;->;uniqueIndex:idx_id_table_id"`
 	Name	string	`gorm:"->;not null;type:varchar(50)"`
 	Code	string	`gorm:"->;unique;not null;type:varchar(25)"`
 	Status	bool	`gorm:"->;not null;default:true"`
 
-	TableID	uint	`gorm:"->;not null;"`
+	TableID	uint	`gorm:"->;not null;uniqueIndex:idx_id_table_id"`
 
 	Table	ITable	`gorm:"->"`
 }
 
 type WState struct{
-	ID uint `gorm:"primaryKey;<-"`
+	ID uint `gorm:"primaryKey;<-;uniqueIndex:idx_id_table_id"`
 	Name	string	`gorm:"<-;not null;type:varchar(50)"`
 	Code	string	`gorm:"<-;unique;not null;type:varchar(25)"`
 	Status	bool	`gorm:"<-;not null;default:true"`
 
-	TableID	uint	`gorm:"<-;not null;"`
+	TableID	uint	`gorm:"<-;not null;uniqueIndex:idx_id_table_id"`
 }
 
 func (model *WState) TableName() string {
