@@ -2,6 +2,8 @@ package models
 
 import (
 	"gorm.io/gorm"
+
+	"sa_web_service/internal/models/const"
 )
 
 
@@ -24,7 +26,7 @@ type WTable struct{
 }
 
 func (model *WTable) TableName() string{
-	return "i_tables"
+	return string(cons.TableTables)
 }
 
 func (model *ITable) Get(db *gorm.DB, builder *Builder) *gorm.DB{

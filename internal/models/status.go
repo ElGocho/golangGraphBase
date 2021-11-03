@@ -2,6 +2,8 @@ package models
 
 import (
 	"gorm.io/gorm"
+	
+	"sa_web_service/internal/models/const"
 )
 
 
@@ -26,7 +28,7 @@ type WState struct{
 }
 
 func (model *WState) TableName() string {
-	return "i_states"
+	return string(cons.TableStates)
 }
 
 func (model *IState) Get(db *gorm.DB, builder *Builder) *gorm.DB{

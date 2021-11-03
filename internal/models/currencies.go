@@ -2,6 +2,8 @@ package models
 
 import (
 	"gorm.io/gorm"
+
+	"sa_web_service/internal/models/const"
 )
 
 type ICurrency struct {
@@ -23,7 +25,7 @@ type WCurrency struct {
 }
 
 func (model *WCurrency) TableName() string{
-	return "i_currencies"
+	return string(cons.TableCurrencies)
 }
 
 func (model *ICurrency) getFromDB(db *gorm.DB) *gorm.DB{

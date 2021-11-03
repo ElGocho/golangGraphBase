@@ -2,43 +2,41 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"net/http"
-	"sa_web_service/graph/generated"
-	"sa_web_service/internal/resolvers"
 	"sa_web_service/internal/models"
 	"sa_web_service/internal/database"
+	"sa_web_service/internal/handlers"
+	"sa_web_service/internal/handlers/middlewares"
 
 	"gorm.io/gorm"
 	"gorm.io/driver/postgres"
+	"gorm.io/gorm/logger"
 
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/gin-gonic/gin"
 )
-
-const defaultPort = "8080"
 
 func main() {
 	env := &models.ENV{}
 
 	env.Load(".env")
 
-	port := env.PORT
-	if port == "" {
-		port = defaultPort
-	}
-
 	db := getDB(env)
 
 	autoFunc(db, env)
 
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: getResolver(db, env)}))
+	fmt.Printf("[MAIN] Subiendo servidor en puerto %s\n",env.PORT)
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	serverUp(db,env)
+}
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+func serverUp(db *gorm.DB, env *models.ENV){
+	r := gin.Default()
+	
+	r.Use(middlewares.GinContextToContext())
+
+	r.POST("/query", handlers.GraphQL(db,env))
+	r.GET("/", handlers.Playground())
+	
+	r.Run()
 }
 
 func getDB (env *models.ENV) (db *gorm.DB){
@@ -50,13 +48,8 @@ func getDB (env *models.ENV) (db *gorm.DB){
 		panic(err)
 	}
 
-	return
-}
-
-func getResolver(db *gorm.DB, env *models.ENV) (r *resolvers.Resolver){
-	r = &resolvers.Resolver{
-		db,
-		env,
+	if env.LOG_MODE{
+		db.Logger.LogMode(logger.Info)
 	}
 
 	return
@@ -68,4 +61,9 @@ func autoFunc(db *gorm.DB, env *models.ENV) {
 		database.ExecAll(db)
 	}
 
+	if env.GIN_MODE == "release"{
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 }
+

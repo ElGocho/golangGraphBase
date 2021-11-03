@@ -2,6 +2,8 @@ package models
 
 import (
 	"gorm.io/gorm"
+
+	"sa_web_service/internal/models/const"
 )
 
 type ICountry struct {
@@ -22,7 +24,7 @@ type WCountry struct {
 }
 
 func (models *WCountry) TableName() string{
-	return "i_countries"
+	return string(cons.TableCountries)
 }
 
 func (model *ICountry) getFromDB(db *gorm.DB) *gorm.DB{
