@@ -2,25 +2,10 @@
 
 package model
 
+import (
+	"sa_web_service/internal/models"
+)
+
 type RegisterInput struct {
-	User *UserInput `json:"user"`
-}
-
-type User struct {
-	ID             string `json:"id"`
-	Name           string `json:"name"`
-	Email          string `json:"email"`
-	Identification string `json:"identification"`
-	Image          string `json:"image"`
-	Password       string `json:"password"`
-	RoleID         int    `json:"role_id"`
-}
-
-type UserInput struct {
-	Name           string `json:"name"`
-	Email          string `json:"email"`
-	Identification string `json:"identification"`
-	Image          string `json:"image"`
-	Password       string `json:"password"`
-	RoleID         int    `json:"role_id"`
+	User *models.User `json:"user"`
 }
