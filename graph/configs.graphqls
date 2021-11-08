@@ -9,4 +9,9 @@ directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITI
   | FIELD_DEFINITION
 
 scalar Uint
+scalar Map
 
+
+enum filters{
+  id 
+}

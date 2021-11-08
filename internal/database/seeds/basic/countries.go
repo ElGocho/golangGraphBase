@@ -2,7 +2,7 @@ package basic
 
 import (
 	"sa_web_service/internal/models"
-	"sa_web_service/internal/models/const"
+	"sa_web_service/internal/models/consts"
 )
 
 
@@ -10,8 +10,8 @@ import (
 func GetWCountries() []*models.WCountry{
 	return []*models.WCountry{
 		&models.WCountry{
-			Name: cons.CountryVenezuela.Name(),
-			Code: string(cons.CountryVenezuela),
+			Name: consts.CountryVenezuela.Name(),
+			Code: string(consts.CountryVenezuela),
 			Status: true,
 			Currencies: GetWCurrenciesVenezuela(),
 			Languages: GetWLanguagesVenezuela(),

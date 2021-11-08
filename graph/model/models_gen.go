@@ -3,9 +3,70 @@
 package model
 
 import (
+	"fmt"
+	"io"
 	"sa_web_service/internal/models"
+	"strconv"
 )
+
+type Pagination struct {
+	Page *int `json:"page"`
+	Skip *int `json:"skip"`
+	Take *int `json:"take"`
+}
+
+type QueryBuilder struct {
+	Filter     map[string]interface{} `json:"filter"`
+	Pagination *Pagination            `json:"pagination"`
+	Order      *string                `json:"order"`
+	Group      *string                `json:"group"`
+	Load       []string               `json:"load"`
+	Join       []string               `json:"join"`
+}
+
+type QueryInput struct {
+	Builder *QueryBuilder `json:"Builder"`
+}
 
 type RegisterInput struct {
 	User *models.User `json:"user"`
+}
+
+type Filters string
+
+const (
+	FiltersID Filters = "id"
+)
+
+var AllFilters = []Filters{
+	FiltersID,
+}
+
+func (e Filters) IsValid() bool {
+	switch e {
+	case FiltersID:
+		return true
+	}
+	return false
+}
+
+func (e Filters) String() string {
+	return string(e)
+}
+
+func (e *Filters) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Filters(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid filters", str)
+	}
+	return nil
+}
+
+func (e Filters) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

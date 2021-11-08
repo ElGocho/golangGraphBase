@@ -1,4 +1,4 @@
-package cons
+package consts
 
 //Enumeración de Tablas
 const (

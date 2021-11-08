@@ -2,35 +2,35 @@ package basic
 
 import (
 	"sa_web_service/internal/models"
-	"sa_web_service/internal/models/const"
+	"sa_web_service/internal/models/consts"
 )
 
 func GetWTables() []*models.WTable{
 	return []*models.WTable{
 		&models.WTable{
-			Name: cons.TableUsers.Name(),
-			Code: string(cons.TableUsers),
+			Name: consts.TableUsers.Name(),
+			Code: string(consts.TableUsers),
 			Status: true,
 			States: GetWStatesUser(),
 		},
 		&models.WTable{
-			Name: cons.TableArticles.Name(),
-			Code: string(cons.TableArticles),
+			Name: consts.TableArticles.Name(),
+			Code: string(consts.TableArticles),
 			Status: true,
 		},
 		&models.WTable{
-			Name: cons.TablePrices.Name(),
-			Code: string(cons.TablePrices),
+			Name: consts.TablePrices.Name(),
+			Code: string(consts.TablePrices),
 			Status: true,
 		},
 		&models.WTable{
-			Name: cons.TableReceipts.Name(),
-			Code: string(cons.TableReceipts),
+			Name: consts.TableReceipts.Name(),
+			Code: string(consts.TableReceipts),
 			Status: true,
 		},
 		&models.WTable{
-			Name: cons.TableReceiptArticles.Name(),
-			Code: string(cons.TableReceiptArticles),
+			Name: consts.TableReceiptArticles.Name(),
+			Code: string(consts.TableReceiptArticles),
 			Status: true,
 		},
 	}

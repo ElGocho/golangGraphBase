@@ -1,4 +1,4 @@
-package cons 
+package consts 
 
 const (
 	CurrencyVenezuela currency = "VES"

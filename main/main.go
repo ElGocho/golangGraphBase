@@ -40,17 +40,22 @@ func serverUp(db *gorm.DB, env *models.ENV){
 }
 
 func getDB (env *models.ENV) (db *gorm.DB){
+	logMode := logger.Error
+
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s", env.DB_HOST, env.DB_USER, env.DB_PASSWORD, env.DB_NAME, env.DB_PORT, env.DB_SSLMODE)
 
-	db,err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if env.LOG_MODE{
+		logMode = logger.Info
+	}
+
+	db,err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logMode),
+	})
 
 	if err != nil {
 		panic(err)
 	}
 
-	if env.LOG_MODE{
-		db.Logger.LogMode(logger.Info)
-	}
 
 	return
 }

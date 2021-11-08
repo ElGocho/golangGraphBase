@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"sa_web_service/internal/models/const"
+	"sa_web_service/internal/models/consts"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,7 +20,7 @@ func GetFromContext(ctx context.Context, key string) (interface{}, error){
 }
 
 func GetGinContext(ctx context.Context) (*gin.Context, error) {
-	value, err := GetFromContext(ctx, cons.GinContext)
+	value, err := GetFromContext(ctx, consts.GinContext)
 
 	if err != nil{
 		return nil, err

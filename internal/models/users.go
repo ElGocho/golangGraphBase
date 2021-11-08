@@ -26,6 +26,7 @@ type User struct {
 	Role	IRole	`gorm:"foreignKey:RoleID;->"`
 }
 
+type Users []*User
 
 func (model *User) BeforeCreate(tx *gorm.DB) (err error){
 	model.ID = uuid.New()
@@ -49,10 +50,16 @@ func (model *User) BeforeCreate(tx *gorm.DB) (err error){
 	return 
 }
 
-func (model *User) Get(db *gorm.DB, builder *Builder) *gorm.DB{
-	BuilderORMQuery(db, builder)
+func (model *User) Get(tx *gorm.DB, builder *Builder) *gorm.DB{
+	db := BuilderORMQuery(tx, builder)
 
 	return db.First(model)
+}
+
+func (model *Users) Find(tx *gorm.DB, builder *Builder) *gorm.DB{
+	db := BuilderORMQuery(tx, builder)
+
+	return db.Find(&model)
 }
 
 func (model *User) Create(db *gorm.DB) *gorm.DB{

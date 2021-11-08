@@ -3,7 +3,7 @@ package models
 import (
 	"gorm.io/gorm"
 	
-	"sa_web_service/internal/models/const"
+	"sa_web_service/internal/models/consts"
 )
 
 type IRole struct{
@@ -21,7 +21,7 @@ type WRole struct{
 }
 
 func (model *WRole) TableName() string{
-	return string(cons.TableRoles)
+	return string(consts.TableRoles)
 }
 
 func (model *IRole) getFromDB(db *gorm.DB) *gorm.DB{

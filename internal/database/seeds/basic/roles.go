@@ -2,24 +2,24 @@ package basic
 
 import (
 	"sa_web_service/internal/models"
-	"sa_web_service/internal/models/const"
+	"sa_web_service/internal/models/consts"
 )
 
 func GetWRoles() []*models.WRole{
 	return []*models.WRole{
 		&models.WRole{
-			Name: cons.RoleAdministrator.Name(),
-			Code: string(cons.RoleAdministrator),
+			Name: consts.RoleAdministrator.Name(),
+			Code: string(consts.RoleAdministrator),
 			Status: true,
 		},
 		&models.WRole{
-			Name: cons.RoleClient.Name(),
-			Code: string(cons.RoleClient),
+			Name: consts.RoleClient.Name(),
+			Code: string(consts.RoleClient),
 			Status: true,
 		},
 		&models.WRole{
-			Name: cons.RoleSeller.Name(),
-			Code: string(cons.RoleSeller),
+			Name: consts.RoleSeller.Name(),
+			Code: string(consts.RoleSeller),
 			Status: true,
 		},
 	}

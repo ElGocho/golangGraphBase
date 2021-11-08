@@ -1,5 +1,7 @@
 type Query {
   ping: Boolean!
+
+  users(input:QueryInput):[User!]!
 }
 
 type Mutation {
@@ -9,25 +11,3 @@ type Mutation {
 }
 
 
-type User @goModel(model: "sa_web_service/internal/models.User"){
-  id: ID! @goField(name:"ID")
-  name: String! @goField(name:"Name")
-  email: String! @goField(name:"Email")
-  identification: String! @goField(name:"Identification")
-  image: String! @goField(name:"Image")
-  password: String! @goField(name:"Password")
-  role_id: Uint! @goField(name:"RoleID")
-}
-
-input RegisterInput{
-  user: UserInput!
-}
-
-input UserInput @goModel(model: "sa_web_service/internal/models.User"){
-  name: String! @goField(name:"Name")
-  email: String! @goField(name:"Email")
-  identification: String! @goField(name:"Identification")
-  image: String! @goField(name:"Image")
-  password: String! @goField(name:"Password")
-  role_id: Uint! @goField(name:"RoleID")
-}

@@ -16,5 +16,5 @@ type Resolver struct{
 
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutations.MutationResolver{ r.DB, r.ENV} }
 
-func (r *Resolver) Query() generated.QueryResolver { return &queries.QueryResolver{} }
+func (r *Resolver) Query() generated.QueryResolver { return &queries.QueryResolver{ r.DB, r.ENV} }
 
