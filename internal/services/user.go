@@ -12,42 +12,11 @@ import (
 func RegisterUser(tx *gorm.DB, user *models.User) (*models.User, error){
 	db := models.NewSession(tx)
 
-	builder := &models.Builder{
-		Select: "id",
-		Where: []models.Where{
-			{
-				Condition: models.ITable{ Code: string(consts.TableUsers)},
-			},
-		},
-	}
-
-	err := user.Table.Get(db, builder).Error
-
+	err := configUser(db, user, consts.StateActUser)
+	
 	if err != nil {
 		return nil, err
 	}
-
-	user.TableID = user.Table.ID
-
-	builder = &models.Builder{
-		Select: "id",
-		Where: []models.Where{
-			{
-				Condition: models.IState{ 
-					Code: string(consts.StateActUser),
-					TableID: user.TableID,
-				},
-			},
-		},
-	}
-
-	err = user.State.Get(db, builder).Error
-
-	if err != nil {
-		return nil, err
-	}
-
-	user.StateID = user.State.ID
 
 	err = user.Create(db).Error
 
@@ -70,4 +39,28 @@ func Users(tx *gorm.DB, qBuilder *gql.QueryBuilder, pBuilder *models.Builder) (r
 	resp.Find(db, builder)
 
 	return
+}
+
+func configUser(db *gorm.DB, user *models.User, state consts.State) error {
+	builder := models.SelectITable(consts.TableUsers, "id")
+
+	err := user.Table.Get(db, builder).Error
+
+	if err != nil {
+		return err
+	}
+
+	user.TableID = user.Table.ID
+
+	builder = models.SelectIState(state, user.TableID, "id")
+
+	err = user.State.Get(db, builder).Error
+
+	if err != nil {
+		return err
+	}
+
+	user.StateID = user.State.ID
+
+	return nil
 }

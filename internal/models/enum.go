@@ -1,6 +1,5 @@
 package models
 
-
 type Priority byte 
 
 const (

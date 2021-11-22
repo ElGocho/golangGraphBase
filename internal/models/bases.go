@@ -8,7 +8,7 @@ import (
 
 
 type Base struct {
-	ID	uuid.UUID	`gorm:"type:uuid;primaryKey"`
+	ID	uuid.UUID	`gorm:"type:uuid;primaryKey;"`
 }
 
 type BaseModel struct{

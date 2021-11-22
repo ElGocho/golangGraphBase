@@ -17,6 +17,7 @@ func GetWTables() []*models.WTable{
 			Name: consts.TableArticles.Name(),
 			Code: string(consts.TableArticles),
 			Status: true,
+			States: GetWStatesArticle(),
 		},
 		&models.WTable{
 			Name: consts.TablePrices.Name(),

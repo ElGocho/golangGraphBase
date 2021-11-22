@@ -32,7 +32,7 @@ func (model *WState) TableName() string {
 }
 
 func (model *IState) Get(db *gorm.DB, builder *Builder) *gorm.DB{
-	BuilderORMQuery(db, builder)
+	db = BuilderORMQuery(db, builder)
 
 	return db.First(model)
 }

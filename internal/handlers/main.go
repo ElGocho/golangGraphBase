@@ -4,6 +4,7 @@ import (
 	"sa_web_service/graph/generated"
 	"sa_web_service/internal/resolvers"
 	"sa_web_service/internal/models"
+	"sa_web_service/internal/handlers/middlewares"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -17,8 +18,12 @@ func GraphQL(db *gorm.DB, env *models.ENV) gin.HandlerFunc{
 		db,
 		env,
 	}
+	
+	config := generated.Config{Resolvers:r}
 
-	h := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers:r}))
+	config.Directives.IsAuthenticated = middlewares.IsAuthenticated
+
+	h := handler.NewDefaultServer(generated.NewExecutableSchema(config))
 
 	return func(c *gin.Context) {
 		h.ServeHTTP(c.Writer, c.Request)

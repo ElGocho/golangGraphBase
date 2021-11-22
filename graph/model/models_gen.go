@@ -9,6 +9,19 @@ import (
 	"strconv"
 )
 
+type CUArticleInput struct {
+	Articles []*models.Article `json:"articles"`
+}
+
+type LoginInput struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type LoginRequest struct {
+	Token string `json:"token"`
+}
+
 type Pagination struct {
 	Page *int `json:"page"`
 	Skip *int `json:"skip"`

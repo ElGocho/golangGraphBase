@@ -1,10 +1,10 @@
 package consts
 
 const (
-	CountryVenezuela country = "VEN"
+	CountryVenezuela Country = "VEN"
 )
 
-func (c country) Name() string{
+func (c Country) Name() string{
 	switch(c){
 	case CountryVenezuela: return "Venezuela"
 	}

@@ -2,22 +2,22 @@ package consts
 
 //Enumeración de Tablas
 const (
-	TableTables table = "i_tables"
-	TableCountries table = "i_countries"
-	TableLanguages table = "i_languages"
-	TableStates table = "i_states"
-	TableRoles	table	=	"i_roles"
-	TableCurrencies table = "i_currencies"
-	TableUsers table = "users"
-	TableArticles table = "articles"
-	TablePrices table = "prices"
-	TableReceipts table = "receipts"
-	TableReceiptArticles table = "receipt_articles"
+	TableTables Table = "i_tables"
+	TableCountries Table = "i_countries"
+	TableLanguages Table = "i_languages"
+	TableStates Table = "i_states"
+	TableRoles	Table =	"i_roles"
+	TableCurrencies Table = "i_currencies"
+	TableUsers Table = "users"
+	TableArticles Table = "articles"
+	TablePrices Table = "prices"
+	TableReceipts Table = "receipts"
+	TableReceiptArticles Table = "receipt_articles"
 
-	TableStatusDate table = "status_date"
+	TableStatusDate Table = "status_date"
 )
 
-func (t table) Name() string{
+func (t Table) Name() string{
 	switch(t){
 	case TableTables: return "Tablas"
 	case TableCountries: return "Paises"

@@ -1,12 +1,12 @@
 package consts
 
 const (
-	RoleAdministrator	role = "administrator"
-	RoleClient role = "client"
-	RoleSeller role = "seller"
+	RoleAdministrator	Role = "administrator"
+	RoleClient Role = "client"
+	RoleSeller Role = "seller"
 )
 
-func (r role) Name() string{
+func (r Role) Name() string{
 	switch(r){
 	case RoleAdministrator: return "Administrador"
 	case RoleClient:	return "Cliente"

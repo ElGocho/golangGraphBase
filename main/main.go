@@ -32,6 +32,7 @@ func serverUp(db *gorm.DB, env *models.ENV){
 	r := gin.Default()
 	
 	r.Use(middlewares.GinContextToContext())
+	r.Use(middlewares.AuthMiddleware())
 
 	r.POST("/query", handlers.GraphQL(db,env))
 	r.GET("/", handlers.Playground())

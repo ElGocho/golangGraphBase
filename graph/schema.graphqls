@@ -1,13 +1,18 @@
 type Query {
   ping: Boolean!
 
-  users(input:QueryInput):[User!]!
+  users(input:QueryInput):[User!]! @isAuthenticated
+  articles(input:QueryInput):[Article!]! @isAuthenticated
 }
 
 type Mutation {
   ping2: Boolean!
 
   register(input:RegisterInput!):User!
+  login(input:LoginInput!):LoginRequest!
+
+  createArticles(input:CUArticleInput!):[Article!]! @isAuthenticated
+  updateArticles(input:CUArticleInput!):[Article!]! @isAuthenticated
 }
 
 

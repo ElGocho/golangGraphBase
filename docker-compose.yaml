@@ -15,9 +15,6 @@ services:
             sh scripts/run.sh" 
     depends_on:
       - "postgreSQL"
-    links:
-      - postgreSQL 
-    network_mode: bridge
   postgreSQL:
     image: postgres
     hostname: postgres 
@@ -31,4 +28,6 @@ services:
       - POSTGRES_PASSWORD=secret_password
       - POSTGRES_USER=usuario
       - POSTGRES_DB=miBD
-    network_mode: bridge
+
+
+

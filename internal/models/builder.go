@@ -1,8 +1,12 @@
 package models
 
 import (
-	"gorm.io/gorm"
 	"fmt"
+	"strings"
+	"gorm.io/gorm"
+
+	"sa_web_service/internal/models/consts"
+	"sa_web_service/internal/helpers"
 )
 
 type Builder struct {
@@ -12,6 +16,15 @@ type Builder struct {
 	Pagination *Pagination `json:"pagination"`
 	Order *string	`json:"order"`
 	Group *string	`json:"group"`
+	Omit []string `json:"omit"`
+	Joins	[]string	`json:"joins"`
+	Preloads []Preload	`json:"load"`
+}
+
+type Preload struct{
+	Load	string
+	Where	[]Where
+	Order	*string
 }
 
 type Where struct {
@@ -30,12 +43,12 @@ func NewSession(tx *gorm.DB) *gorm.DB{
 	return tx.Session(&gorm.Session{NewDB: true})
 }
 
-func BuilderORMQuery(db *gorm.DB, builder *Builder) *gorm.DB{
+func BuilderORMQuery(tx *gorm.DB, builder *Builder) *gorm.DB{
 	if(builder == nil){
-		return  db
+		return  tx
 	}
 
-	db = BuilderORMTable(db,builder)
+	db := BuilderORMTable(tx,builder)
 
 	db = BuilderORMSelect(db, builder)
 
@@ -47,6 +60,12 @@ func BuilderORMQuery(db *gorm.DB, builder *Builder) *gorm.DB{
 
 	db = BuilderORMPagination(db, builder)
 
+	db = BuilderORMOmit(db, builder)
+
+	db = BuilderORMPreloads(db, builder)
+
+	db = BuilderORMJoins(db, builder)
+	
 	return db
 }
 
@@ -124,6 +143,41 @@ func BuilderORMPagination(db *gorm.DB, builder *Builder) *gorm.DB{
 	return db
 }
 
+func BuilderORMOmit(db *gorm.DB, builder *Builder) *gorm.DB{
+	if builder == nil || len(builder.Omit) == 0 {
+		return db	
+	}
+
+	omit := strings.Join(builder.Omit,",")
+
+	db = db.Omit(omit)
+
+	return db
+}
+
+func BuilderORMPreloads(db *gorm.DB, builder *Builder) *gorm.DB{
+	if builder == nil || len(builder.Preloads) == 0 {
+		return db	
+	}
+
+	for _,preload := range builder.Preloads{ db = db.Preload(preload.Load)
+	}
+
+	return db
+}
+
+func BuilderORMJoins(db *gorm.DB, builder *Builder) *gorm.DB{
+	if builder == nil || len(builder.Joins) == 0 {
+		return db	
+	}
+
+	for _,join := range builder.Joins{
+		db = db.Joins(join)
+	}
+
+	return db
+}
+
 func (b *Builder) Merge(param *Builder, priority *Priority) {
 	if param == nil {
 		return
@@ -138,6 +192,12 @@ func (b *Builder) Merge(param *Builder, priority *Priority) {
 	b.mergeOrder(param.Order, *priority)
 
 	b.mergeGroup(param.Group, *priority)
+
+	b.mergeOmit(param.Omit, *priority)
+
+	b.mergePreloads(param.Preloads, *priority)
+
+	b.mergeJoins(param.Joins, *priority)
 }
 
 func (b *Builder) mergeWhere(param []Where, priority Priority){
@@ -210,6 +270,7 @@ func (b *Builder)mergeOrder(param *string, priority Priority){
 		return
 	}else if b.Order == nil {
 		b.Order = param
+		return
 	}
 
 	switch(priority){
@@ -227,6 +288,7 @@ func (b *Builder)mergeGroup(param *string, priority Priority){
 		return
 	}else if b.Group == nil {
 		b.Group = param
+		return
 	}
 
 	switch(priority){
@@ -237,6 +299,100 @@ func (b *Builder)mergeGroup(param *string, priority Priority){
 			group := fmt.Sprintf("%s,%s",*b.Group, *param)
 			b.Group = &group
 	}
+}
+
+func (b *Builder)mergeOmit(param []string, priority Priority){
+	if len(param) == 0{
+		return
+	}else if len(b.Omit) == 0 {
+		b.Omit = param
+		return
+	}
+
+	switch(priority){
+		case Priority1: 
+				for _,elem := range param {
+					if helpers.FindString(b.Omit, elem) != -1{
+						b.Omit = append(b.Omit, elem)
+					}
+				}
+		case Priority2: 
+				for _,elem := range b.Omit{
+					if helpers.FindString(param, elem) != -1{
+						param = append(param, elem)
+					}
+				}
+
+				b.Omit = param
+		default:
+			b.Omit = append(b.Omit, param...)
+	}
+}
+
+func (b *Builder)mergePreloads(param []Preload, priority Priority){
+	if len(param) == 0{
+		return
+	}else if len(b.Preloads) == 0 {
+		b.Preloads = param
+		return
+	}
+
+	switch(priority){
+		case Priority1: 
+				for _,elem := range param {
+					if PreloadContains(b.Preloads, elem) != -1{
+						b.Preloads = append(b.Preloads, elem)
+					}
+				}
+		case Priority2: 
+				for _,elem := range b.Preloads{
+					if PreloadContains(param, elem) != -1{
+						param = append(param, elem)
+					}
+				}
+
+				b.Preloads = param
+		default:
+			b.Preloads = append(b.Preloads, param...)
+	}
+}
+
+func (b *Builder)mergeJoins(param []string, priority Priority){
+	if len(param) == 0{
+		return
+	}else if len(b.Joins) == 0 {
+		b.Joins= param
+		return
+	}
+
+	switch(priority){
+		case Priority1: 
+				for _,elem := range param {
+					if helpers.FindString(b.Joins, elem) != -1{
+						b.Joins = append(b.Joins, elem)
+					}
+				}
+		case Priority2: 
+				for _,elem := range b.Joins{
+					if helpers.FindString(param, elem) != -1{
+						param = append(param, elem)
+					}
+				}
+
+				b.Joins = param
+		default:
+			b.Joins = append(b.Joins, param...)
+	}
+}
+
+func PreloadContains(array []Preload, search Preload) int{
+	for index,elem := range array{
+		if elem.Load == search.Load {
+			return index
+		}
+	}
+
+	return -1
 }
 
 func (b *Builder)WhereContains(param Where, priority Priority) (bool, int, []Where){
@@ -289,6 +445,39 @@ func RemoveWhereFromSliceOrdenado(slice []Where, index int) ([]Where, error) {
 	return append(slice[:index], slice[index+1:]...), nil
 }
 
-func SelectOnlyID() *Builder{
-	return &Builder{ Select: "id" }
+func SelectITable(table consts.Table, selects string) *Builder {
+	miSelect := "id"
+
+	if selects != "" {
+		miSelect = selects
+	}
+
+	return &Builder{
+		Select: miSelect,
+		Where: []Where{
+			{
+				Condition: ITable{ Code: string(table)},
+			},
+		},
+	}
+}
+
+func SelectIState(state consts.State, tableID uint, selects string) *Builder {
+	miSelect := "id"
+
+	if selects != "" {
+		miSelect = selects
+	}
+	
+	return &Builder{
+		Select: miSelect,
+		Where: []Where{
+			{
+				Condition: IState{ 
+					Code: string(state),
+					TableID: tableID,
+				},
+			},
+		},
+	}
 }

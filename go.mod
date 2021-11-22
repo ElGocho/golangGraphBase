@@ -6,6 +6,7 @@ require (
 	github.com/99designs/gqlgen v0.14.0
 	github.com/Z-M-Huang/gqlgen-scalar v0.0.0-20210221012440-e92e7a134366
 	github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.7.4
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/google/uuid v1.3.0

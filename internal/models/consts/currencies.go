@@ -1,10 +1,10 @@
 package consts 
 
 const (
-	CurrencyVenezuela currency = "VES"
+	CurrencyVenezuela Currency = "VES"
 )
 
-func (c currency) Name() string {
+func (c Currency) Name() string {
 	switch(c){
 	case CurrencyVenezuela: return "Bs"
 	}

@@ -30,7 +30,7 @@ func (model *WTable) TableName() string{
 }
 
 func (model *ITable) Get(db *gorm.DB, builder *Builder) *gorm.DB{
-	BuilderORMQuery(db, builder)
+	db = BuilderORMQuery(db, builder)
 
 	return db.First(model)
 }

@@ -1,11 +1,11 @@
 package consts
 
 const (
-	LanguageVenezuela language = "es-VE"
-	LanguageEspaña language = "es"
+	LanguageVenezuela Language = "es-VE"
+	LanguageEspaña Language = "es"
 )
 
-func (l language) Name() string{
+func (l Language) Name() string{
 	switch(l){
 	case LanguageVenezuela: return "Español venezuela"
 	case LanguageEspaña: return "Español"
