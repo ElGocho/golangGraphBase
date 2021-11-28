@@ -13,6 +13,10 @@ type CUArticleInput struct {
 	Articles []*models.Article `json:"articles"`
 }
 
+type CUReceiptInput struct {
+	Receipts []*models.Receipt `json:"receipts"`
+}
+
 type LoginInput struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`

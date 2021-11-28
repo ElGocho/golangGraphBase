@@ -16,6 +16,10 @@ input CUArticleInput{
   articles: [ArticleInput!]!
 }
 
+input CUReceiptInput{
+  receipts: [ReceiptInput!]!
+}
+
 input UserInput @goModel(model: "sa_web_service/internal/models.User"){
   name: String! @goField(name:"Name")
   email: String! @goField(name:"Email")
@@ -39,6 +43,21 @@ input PriceInput @goModel(model: "sa_web_service/internal/models.Price"){
   id: ID @goField(name:"ID")
   amount: Float! @goField(name:"Amount")
   currency_id: Uint! @goField(name:"CurrencyID")
+}
+
+input ReceiptInput @goModel(model: "sa_web_service/internal/models.Receipt"){
+  id: ID  @goField(name:"ID")
+  client_id:  ID  @goField(name:"ClientID")
+  state_id: Uint  @goField(name:"StateID")
+  currency_id: Uint @goField(name:"CurrencyID")
+  receipt_articles: [ReceiptArticleInput!] @goField(name:"ReceiptArticles")
+}
+
+input ReceiptArticleInput @goModel(model: "sa_web_service/internal/models.ReceiptArticle"){
+  id: ID @goField(name:"ID") 
+  article_id: ID  @goField(name:"ArticleID")
+  price_id: ID! @goField(name:"PriceID")
+  state_id: Uint   @goField(name:"StateID")
 }
 
 input Pagination{

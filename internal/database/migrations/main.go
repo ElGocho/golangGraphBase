@@ -17,7 +17,7 @@ func GetAll() (resp []interface{}){
 	resp = append(resp, &models.User{})
 	resp = append(resp, &models.Price{})
 	resp = append(resp, &models.Receipt{})
-	resp = append(resp, &models.ReceiptArticles{})
+	resp = append(resp, &models.ReceiptArticle{})
 	resp = append(resp, &models.StatusDate{})
 
 	return

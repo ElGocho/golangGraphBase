@@ -28,11 +28,13 @@ func GetWTables() []*models.WTable{
 			Name: consts.TableReceipts.Name(),
 			Code: string(consts.TableReceipts),
 			Status: true,
+			States: GetWStatesReceipt(),
 		},
 		&models.WTable{
 			Name: consts.TableReceiptArticles.Name(),
 			Code: string(consts.TableReceiptArticles),
 			Status: true,
+			States: GetWStatesReceiptArticle(),
 		},
 	}
 }

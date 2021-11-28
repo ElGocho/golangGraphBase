@@ -66,6 +66,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		CreateArticles func(childComplexity int, input model.CUArticleInput) int
+		CreateReceipts func(childComplexity int, input model.CUReceiptInput) int
 		Login          func(childComplexity int, input model.LoginInput) int
 		Ping2          func(childComplexity int) int
 		Register       func(childComplexity int, input model.RegisterInput) int
@@ -82,6 +83,21 @@ type ComplexityRoot struct {
 		Articles func(childComplexity int, input *model.QueryInput) int
 		Ping     func(childComplexity int) int
 		Users    func(childComplexity int, input *model.QueryInput) int
+	}
+
+	Receipt struct {
+		ClientID        func(childComplexity int) int
+		CurrencyID      func(childComplexity int) int
+		ID              func(childComplexity int) int
+		ReceiptArticles func(childComplexity int) int
+		StateID         func(childComplexity int) int
+	}
+
+	ReceiptArticle struct {
+		ArticleID func(childComplexity int) int
+		ID        func(childComplexity int) int
+		PriceID   func(childComplexity int) int
+		StateID   func(childComplexity int) int
 	}
 
 	User struct {
@@ -101,6 +117,7 @@ type MutationResolver interface {
 	Login(ctx context.Context, input model.LoginInput) (*model.LoginRequest, error)
 	CreateArticles(ctx context.Context, input model.CUArticleInput) ([]*models.Article, error)
 	UpdateArticles(ctx context.Context, input model.CUArticleInput) ([]*models.Article, error)
+	CreateReceipts(ctx context.Context, input model.CUReceiptInput) ([]*models.Receipt, error)
 }
 type QueryResolver interface {
 	Ping(ctx context.Context) (bool, error)
@@ -198,6 +215,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateArticles(childComplexity, args["input"].(model.CUArticleInput)), true
 
+	case "Mutation.createReceipts":
+		if e.complexity.Mutation.CreateReceipts == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createReceipts_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateReceipts(childComplexity, args["input"].(model.CUReceiptInput)), true
+
 	case "Mutation.login":
 		if e.complexity.Mutation.Login == nil {
 			break
@@ -292,6 +321,69 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Users(childComplexity, args["input"].(*model.QueryInput)), true
+
+	case "Receipt.client_id":
+		if e.complexity.Receipt.ClientID == nil {
+			break
+		}
+
+		return e.complexity.Receipt.ClientID(childComplexity), true
+
+	case "Receipt.currency_id":
+		if e.complexity.Receipt.CurrencyID == nil {
+			break
+		}
+
+		return e.complexity.Receipt.CurrencyID(childComplexity), true
+
+	case "Receipt.id":
+		if e.complexity.Receipt.ID == nil {
+			break
+		}
+
+		return e.complexity.Receipt.ID(childComplexity), true
+
+	case "Receipt.receipt_articles":
+		if e.complexity.Receipt.ReceiptArticles == nil {
+			break
+		}
+
+		return e.complexity.Receipt.ReceiptArticles(childComplexity), true
+
+	case "Receipt.state_id":
+		if e.complexity.Receipt.StateID == nil {
+			break
+		}
+
+		return e.complexity.Receipt.StateID(childComplexity), true
+
+	case "ReceiptArticle.article_id":
+		if e.complexity.ReceiptArticle.ArticleID == nil {
+			break
+		}
+
+		return e.complexity.ReceiptArticle.ArticleID(childComplexity), true
+
+	case "ReceiptArticle.id":
+		if e.complexity.ReceiptArticle.ID == nil {
+			break
+		}
+
+		return e.complexity.ReceiptArticle.ID(childComplexity), true
+
+	case "ReceiptArticle.price_id":
+		if e.complexity.ReceiptArticle.PriceID == nil {
+			break
+		}
+
+		return e.complexity.ReceiptArticle.PriceID(childComplexity), true
+
+	case "ReceiptArticle.state_id":
+		if e.complexity.ReceiptArticle.StateID == nil {
+			break
+		}
+
+		return e.complexity.ReceiptArticle.StateID(childComplexity), true
 
 	case "User.email":
 		if e.complexity.User.Email == nil {
@@ -445,6 +537,10 @@ input CUArticleInput{
   articles: [ArticleInput!]!
 }
 
+input CUReceiptInput{
+  receipts: [ReceiptInput!]!
+}
+
 input UserInput @goModel(model: "sa_web_service/internal/models.User"){
   name: String! @goField(name:"Name")
   email: String! @goField(name:"Email")
@@ -468,6 +564,21 @@ input PriceInput @goModel(model: "sa_web_service/internal/models.Price"){
   id: ID @goField(name:"ID")
   amount: Float! @goField(name:"Amount")
   currency_id: Uint! @goField(name:"CurrencyID")
+}
+
+input ReceiptInput @goModel(model: "sa_web_service/internal/models.Receipt"){
+  id: ID  @goField(name:"ID")
+  client_id:  ID  @goField(name:"ClientID")
+  state_id: Uint  @goField(name:"StateID")
+  currency_id: Uint @goField(name:"CurrencyID")
+  receipt_articles: [ReceiptArticleInput!] @goField(name:"ReceiptArticles")
+}
+
+input ReceiptArticleInput @goModel(model: "sa_web_service/internal/models.ReceiptArticle"){
+  id: ID @goField(name:"ID") 
+  article_id: ID  @goField(name:"ArticleID")
+  price_id: ID! @goField(name:"PriceID")
+  state_id: Uint   @goField(name:"StateID")
 }
 
 input Pagination{
@@ -517,6 +628,23 @@ type Price @goModel(model: "sa_web_service/internal/models.Price"){
   amount: Float! @goField(name:"Amount")
   currency_id: Uint! @goField(name:"CurrencyID")
 }
+
+
+type Receipt @goModel(model: "sa_web_service/internal/models.Receipt"){
+  id: ID  @goField(name:"ID")
+  client_id:  ID  @goField(name:"ClientID")
+  state_id: Uint  @goField(name:"StateID")
+  currency_id: Uint @goField(name:"CurrencyID")
+  receipt_articles: [ReceiptArticle!] @goField(name:"ReceiptArticles")
+}
+
+type ReceiptArticle @goModel(model: "sa_web_service/internal/models.ReceiptArticle"){
+  id: ID @goField(name:"ID") 
+  article_id: ID  @goField(name:"ArticleID")
+  price_id: ID! @goField(name:"PriceID")
+  state_id: Uint   @goField(name:"StateID")
+}
+
 `, BuiltIn: false},
 	{Name: "graph/schema.graphqls", Input: `type Query {
   ping: Boolean!
@@ -533,6 +661,8 @@ type Mutation {
 
   createArticles(input:CUArticleInput!):[Article!]! @isAuthenticated
   updateArticles(input:CUArticleInput!):[Article!]! @isAuthenticated
+    
+  createReceipts(input:CUReceiptInput!):[Receipt!]! @isAuthenticated
 }
 
 
@@ -551,6 +681,21 @@ func (ec *executionContext) field_Mutation_createArticles_args(ctx context.Conte
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNCUArticleInput2sa_web_serviceᚋgraphᚋmodelᚐCUArticleInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createReceipts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.CUReceiptInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNCUReceiptInput2sa_web_serviceᚋgraphᚋmodelᚐCUReceiptInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1242,6 +1387,68 @@ func (ec *executionContext) _Mutation_updateArticles(ctx context.Context, field 
 	return ec.marshalNArticle2ᚕᚖsa_web_serviceᚋinternalᚋmodelsᚐArticleᚄ(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_createReceipts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createReceipts_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().CreateReceipts(rctx, args["input"].(model.CUReceiptInput))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.IsAuthenticated == nil {
+				return nil, errors.New("directive isAuthenticated is not implemented")
+			}
+			return ec.directives.IsAuthenticated(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*models.Receipt); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*sa_web_service/internal/models.Receipt`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*models.Receipt)
+	fc.Result = res
+	return ec.marshalNReceipt2ᚕᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptᚄ(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Price_id(ctx context.Context, field graphql.CollectedField, obj *models.Price) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1575,6 +1782,297 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	res := resTmp.(*introspection.Schema)
 	fc.Result = res
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Receipt_id(ctx context.Context, field graphql.CollectedField, obj *models.Receipt) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Receipt",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(uuid.UUID)
+	fc.Result = res
+	return ec.marshalOID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Receipt_client_id(ctx context.Context, field graphql.CollectedField, obj *models.Receipt) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Receipt",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ClientID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(uuid.UUID)
+	fc.Result = res
+	return ec.marshalOID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Receipt_state_id(ctx context.Context, field graphql.CollectedField, obj *models.Receipt) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Receipt",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.StateID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(uint)
+	fc.Result = res
+	return ec.marshalOUint2uint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Receipt_currency_id(ctx context.Context, field graphql.CollectedField, obj *models.Receipt) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Receipt",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CurrencyID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(uint)
+	fc.Result = res
+	return ec.marshalOUint2uint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Receipt_receipt_articles(ctx context.Context, field graphql.CollectedField, obj *models.Receipt) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Receipt",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ReceiptArticles, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*models.ReceiptArticle)
+	fc.Result = res
+	return ec.marshalOReceiptArticle2ᚕᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptArticleᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ReceiptArticle_id(ctx context.Context, field graphql.CollectedField, obj *models.ReceiptArticle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ReceiptArticle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(uuid.UUID)
+	fc.Result = res
+	return ec.marshalOID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ReceiptArticle_article_id(ctx context.Context, field graphql.CollectedField, obj *models.ReceiptArticle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ReceiptArticle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ArticleID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(uuid.UUID)
+	fc.Result = res
+	return ec.marshalOID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ReceiptArticle_price_id(ctx context.Context, field graphql.CollectedField, obj *models.ReceiptArticle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ReceiptArticle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PriceID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(uuid.UUID)
+	fc.Result = res
+	return ec.marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ReceiptArticle_state_id(ctx context.Context, field graphql.CollectedField, obj *models.ReceiptArticle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ReceiptArticle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.StateID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(uint)
+	fc.Result = res
+	return ec.marshalOUint2uint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
@@ -3030,6 +3528,29 @@ func (ec *executionContext) unmarshalInputCUArticleInput(ctx context.Context, ob
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputCUReceiptInput(ctx context.Context, obj interface{}) (model.CUReceiptInput, error) {
+	var it model.CUReceiptInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "receipts":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("receipts"))
+			it.Receipts, err = ec.unmarshalNReceiptInput2ᚕᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputLoginInput(ctx context.Context, obj interface{}) (model.LoginInput, error) {
 	var it model.LoginInput
 	asMap := map[string]interface{}{}
@@ -3216,6 +3737,108 @@ func (ec *executionContext) unmarshalInputQueryInput(ctx context.Context, obj in
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Builder"))
 			it.Builder, err = ec.unmarshalOQueryBuilder2ᚖsa_web_serviceᚋgraphᚋmodelᚐQueryBuilder(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputReceiptArticleInput(ctx context.Context, obj interface{}) (models.ReceiptArticle, error) {
+	var it models.ReceiptArticle
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalOID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "article_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("article_id"))
+			it.ArticleID, err = ec.unmarshalOID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "price_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("price_id"))
+			it.PriceID, err = ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "state_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("state_id"))
+			it.StateID, err = ec.unmarshalOUint2uint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputReceiptInput(ctx context.Context, obj interface{}) (models.Receipt, error) {
+	var it models.Receipt
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalOID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "client_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("client_id"))
+			it.ClientID, err = ec.unmarshalOID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "state_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("state_id"))
+			it.StateID, err = ec.unmarshalOUint2uint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "currency_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currency_id"))
+			it.CurrencyID, err = ec.unmarshalOUint2uint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "receipt_articles":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("receipt_articles"))
+			it.ReceiptArticles, err = ec.unmarshalOReceiptArticleInput2ᚕᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptArticleᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3445,6 +4068,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "createReceipts":
+			out.Values[i] = ec._Mutation_createReceipts(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3554,6 +4182,71 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
 			out.Values[i] = ec._Query___schema(ctx, field)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var receiptImplementors = []string{"Receipt"}
+
+func (ec *executionContext) _Receipt(ctx context.Context, sel ast.SelectionSet, obj *models.Receipt) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, receiptImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Receipt")
+		case "id":
+			out.Values[i] = ec._Receipt_id(ctx, field, obj)
+		case "client_id":
+			out.Values[i] = ec._Receipt_client_id(ctx, field, obj)
+		case "state_id":
+			out.Values[i] = ec._Receipt_state_id(ctx, field, obj)
+		case "currency_id":
+			out.Values[i] = ec._Receipt_currency_id(ctx, field, obj)
+		case "receipt_articles":
+			out.Values[i] = ec._Receipt_receipt_articles(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var receiptArticleImplementors = []string{"ReceiptArticle"}
+
+func (ec *executionContext) _ReceiptArticle(ctx context.Context, sel ast.SelectionSet, obj *models.ReceiptArticle) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, receiptArticleImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ReceiptArticle")
+		case "id":
+			out.Values[i] = ec._ReceiptArticle_id(ctx, field, obj)
+		case "article_id":
+			out.Values[i] = ec._ReceiptArticle_article_id(ctx, field, obj)
+		case "price_id":
+			out.Values[i] = ec._ReceiptArticle_price_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "state_id":
+			out.Values[i] = ec._ReceiptArticle_state_id(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3972,6 +4665,11 @@ func (ec *executionContext) unmarshalNCUArticleInput2sa_web_serviceᚋgraphᚋmo
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNCUReceiptInput2sa_web_serviceᚋgraphᚋmodelᚐCUReceiptInput(ctx context.Context, v interface{}) (model.CUReceiptInput, error) {
+	res, err := ec.unmarshalInputCUReceiptInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
 	res, err := graphql.UnmarshalFloat(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4094,6 +4792,101 @@ func (ec *executionContext) unmarshalNPriceInput2ᚕᚖsa_web_serviceᚋinternal
 		}
 	}
 	return res, nil
+}
+
+func (ec *executionContext) marshalNReceipt2ᚕᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Receipt) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNReceipt2ᚖsa_web_serviceᚋinternalᚋmodelsᚐReceipt(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNReceipt2ᚖsa_web_serviceᚋinternalᚋmodelsᚐReceipt(ctx context.Context, sel ast.SelectionSet, v *models.Receipt) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Receipt(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNReceiptArticle2ᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptArticle(ctx context.Context, sel ast.SelectionSet, v *models.ReceiptArticle) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ReceiptArticle(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNReceiptArticleInput2ᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptArticle(ctx context.Context, v interface{}) (*models.ReceiptArticle, error) {
+	res, err := ec.unmarshalInputReceiptArticleInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNReceiptInput2ᚕᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptᚄ(ctx context.Context, v interface{}) ([]*models.Receipt, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*models.Receipt, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNReceiptInput2ᚖsa_web_serviceᚋinternalᚋmodelsᚐReceipt(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNReceiptInput2ᚖsa_web_serviceᚋinternalᚋmodelsᚐReceipt(ctx context.Context, v interface{}) (*models.Receipt, error) {
+	res, err := ec.unmarshalInputReceiptInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNRegisterInput2sa_web_serviceᚋgraphᚋmodelᚐRegisterInput(ctx context.Context, v interface{}) (model.RegisterInput, error) {
@@ -4559,6 +5352,77 @@ func (ec *executionContext) unmarshalOQueryInput2ᚖsa_web_serviceᚋgraphᚋmod
 	}
 	res, err := ec.unmarshalInputQueryInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOReceiptArticle2ᚕᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptArticleᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.ReceiptArticle) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNReceiptArticle2ᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptArticle(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOReceiptArticleInput2ᚕᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptArticleᚄ(ctx context.Context, v interface{}) ([]*models.ReceiptArticle, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*models.ReceiptArticle, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNReceiptArticleInput2ᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptArticle(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

@@ -13,6 +13,8 @@ type Mutation {
 
   createArticles(input:CUArticleInput!):[Article!]! @isAuthenticated
   updateArticles(input:CUArticleInput!):[Article!]! @isAuthenticated
+    
+  createReceipts(input:CUReceiptInput!):[Receipt!]! @isAuthenticated
 }
 
 
