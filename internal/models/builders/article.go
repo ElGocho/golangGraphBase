@@ -108,8 +108,6 @@ func getArticleJoin(builder *models.Builder, param string) *models.Builder{
 	var join string
 
 	switch(param){
-		case "prices":
-			join = "Prices"
 		case "seller":
 			join = "Seller"
 		default:

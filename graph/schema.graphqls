@@ -3,6 +3,7 @@ type Query {
 
   users(input:QueryInput):[User!]! @isAuthenticated
   articles(input:QueryInput):[Article!]! @isAuthenticated
+  receipts(input:QueryInput):[Receipt!]! @isAuthenticated
 }
 
 type Mutation {

@@ -33,11 +33,14 @@ type Price @goModel(model: "sa_web_service/internal/models.Price"){
 
 
 type Receipt @goModel(model: "sa_web_service/internal/models.Receipt"){
-  id: ID  @goField(name:"ID")
-  client_id:  ID  @goField(name:"ClientID")
-  state_id: Uint  @goField(name:"StateID")
-  currency_id: Uint @goField(name:"CurrencyID")
-  receipt_articles: [ReceiptArticle!] @goField(name:"ReceiptArticles")
+  id: ID!  @goField(name:"ID")
+  code: String!  @goField(name:"Code")
+  amount_total: Float!  @goField(name:"AmountTotal")
+  amount_accepted:  Float!  @goField(name:"AmountAccepted")
+  client_id:  ID!  @goField(name:"ClientID")
+  state_id: Uint!  @goField(name:"StateID")
+  currency_id: Uint! @goField(name:"CurrencyID")
+  receipt_articles: [ReceiptArticle!]! @goField(name:"ReceiptArticles")
 }
 
 type ReceiptArticle @goModel(model: "sa_web_service/internal/models.ReceiptArticle"){

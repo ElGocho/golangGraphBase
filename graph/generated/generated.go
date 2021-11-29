@@ -82,11 +82,15 @@ type ComplexityRoot struct {
 	Query struct {
 		Articles func(childComplexity int, input *model.QueryInput) int
 		Ping     func(childComplexity int) int
+		Receipts func(childComplexity int, input *model.QueryInput) int
 		Users    func(childComplexity int, input *model.QueryInput) int
 	}
 
 	Receipt struct {
+		AmountAccepted  func(childComplexity int) int
+		AmountTotal     func(childComplexity int) int
 		ClientID        func(childComplexity int) int
+		Code            func(childComplexity int) int
 		CurrencyID      func(childComplexity int) int
 		ID              func(childComplexity int) int
 		ReceiptArticles func(childComplexity int) int
@@ -123,6 +127,7 @@ type QueryResolver interface {
 	Ping(ctx context.Context) (bool, error)
 	Users(ctx context.Context, input *model.QueryInput) ([]*models.User, error)
 	Articles(ctx context.Context, input *model.QueryInput) ([]*models.Article, error)
+	Receipts(ctx context.Context, input *model.QueryInput) ([]*models.Receipt, error)
 }
 
 type executableSchema struct {
@@ -310,6 +315,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Ping(childComplexity), true
 
+	case "Query.receipts":
+		if e.complexity.Query.Receipts == nil {
+			break
+		}
+
+		args, err := ec.field_Query_receipts_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Receipts(childComplexity, args["input"].(*model.QueryInput)), true
+
 	case "Query.users":
 		if e.complexity.Query.Users == nil {
 			break
@@ -322,12 +339,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Users(childComplexity, args["input"].(*model.QueryInput)), true
 
+	case "Receipt.amount_accepted":
+		if e.complexity.Receipt.AmountAccepted == nil {
+			break
+		}
+
+		return e.complexity.Receipt.AmountAccepted(childComplexity), true
+
+	case "Receipt.amount_total":
+		if e.complexity.Receipt.AmountTotal == nil {
+			break
+		}
+
+		return e.complexity.Receipt.AmountTotal(childComplexity), true
+
 	case "Receipt.client_id":
 		if e.complexity.Receipt.ClientID == nil {
 			break
 		}
 
 		return e.complexity.Receipt.ClientID(childComplexity), true
+
+	case "Receipt.code":
+		if e.complexity.Receipt.Code == nil {
+			break
+		}
+
+		return e.complexity.Receipt.Code(childComplexity), true
 
 	case "Receipt.currency_id":
 		if e.complexity.Receipt.CurrencyID == nil {
@@ -631,11 +669,14 @@ type Price @goModel(model: "sa_web_service/internal/models.Price"){
 
 
 type Receipt @goModel(model: "sa_web_service/internal/models.Receipt"){
-  id: ID  @goField(name:"ID")
-  client_id:  ID  @goField(name:"ClientID")
-  state_id: Uint  @goField(name:"StateID")
-  currency_id: Uint @goField(name:"CurrencyID")
-  receipt_articles: [ReceiptArticle!] @goField(name:"ReceiptArticles")
+  id: ID!  @goField(name:"ID")
+  code: String!  @goField(name:"Code")
+  amount_total: Float!  @goField(name:"AmountTotal")
+  amount_accepted:  Float!  @goField(name:"AmountAccepted")
+  client_id:  ID!  @goField(name:"ClientID")
+  state_id: Uint!  @goField(name:"StateID")
+  currency_id: Uint! @goField(name:"CurrencyID")
+  receipt_articles: [ReceiptArticle!]! @goField(name:"ReceiptArticles")
 }
 
 type ReceiptArticle @goModel(model: "sa_web_service/internal/models.ReceiptArticle"){
@@ -651,6 +692,7 @@ type ReceiptArticle @goModel(model: "sa_web_service/internal/models.ReceiptArtic
 
   users(input:QueryInput):[User!]! @isAuthenticated
   articles(input:QueryInput):[Article!]! @isAuthenticated
+  receipts(input:QueryInput):[Receipt!]! @isAuthenticated
 }
 
 type Mutation {
@@ -765,6 +807,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 }
 
 func (ec *executionContext) field_Query_articles_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.QueryInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalOQueryInput2ᚖsa_web_serviceᚋgraphᚋmodelᚐQueryInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_receipts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *model.QueryInput
@@ -1713,6 +1770,68 @@ func (ec *executionContext) _Query_articles(ctx context.Context, field graphql.C
 	return ec.marshalNArticle2ᚕᚖsa_web_serviceᚋinternalᚋmodelsᚐArticleᚄ(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_receipts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_receipts_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().Receipts(rctx, args["input"].(*model.QueryInput))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.IsAuthenticated == nil {
+				return nil, errors.New("directive isAuthenticated is not implemented")
+			}
+			return ec.directives.IsAuthenticated(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*models.Receipt); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*sa_web_service/internal/models.Receipt`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*models.Receipt)
+	fc.Result = res
+	return ec.marshalNReceipt2ᚕᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptᚄ(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1809,11 +1928,119 @@ func (ec *executionContext) _Receipt_id(ctx context.Context, field graphql.Colle
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(uuid.UUID)
 	fc.Result = res
-	return ec.marshalOID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, field.Selections, res)
+	return ec.marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Receipt_code(ctx context.Context, field graphql.CollectedField, obj *models.Receipt) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Receipt",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Code, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Receipt_amount_total(ctx context.Context, field graphql.CollectedField, obj *models.Receipt) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Receipt",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AmountTotal, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Receipt_amount_accepted(ctx context.Context, field graphql.CollectedField, obj *models.Receipt) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Receipt",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AmountAccepted, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Receipt_client_id(ctx context.Context, field graphql.CollectedField, obj *models.Receipt) (ret graphql.Marshaler) {
@@ -1841,11 +2068,14 @@ func (ec *executionContext) _Receipt_client_id(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(uuid.UUID)
 	fc.Result = res
-	return ec.marshalOID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, field.Selections, res)
+	return ec.marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Receipt_state_id(ctx context.Context, field graphql.CollectedField, obj *models.Receipt) (ret graphql.Marshaler) {
@@ -1873,11 +2103,14 @@ func (ec *executionContext) _Receipt_state_id(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(uint)
 	fc.Result = res
-	return ec.marshalOUint2uint(ctx, field.Selections, res)
+	return ec.marshalNUint2uint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Receipt_currency_id(ctx context.Context, field graphql.CollectedField, obj *models.Receipt) (ret graphql.Marshaler) {
@@ -1905,11 +2138,14 @@ func (ec *executionContext) _Receipt_currency_id(ctx context.Context, field grap
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(uint)
 	fc.Result = res
-	return ec.marshalOUint2uint(ctx, field.Selections, res)
+	return ec.marshalNUint2uint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Receipt_receipt_articles(ctx context.Context, field graphql.CollectedField, obj *models.Receipt) (ret graphql.Marshaler) {
@@ -1937,11 +2173,14 @@ func (ec *executionContext) _Receipt_receipt_articles(ctx context.Context, field
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]*models.ReceiptArticle)
 	fc.Result = res
-	return ec.marshalOReceiptArticle2ᚕᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptArticleᚄ(ctx, field.Selections, res)
+	return ec.marshalNReceiptArticle2ᚕᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptArticleᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ReceiptArticle_id(ctx context.Context, field graphql.CollectedField, obj *models.ReceiptArticle) (ret graphql.Marshaler) {
@@ -4178,6 +4417,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
+		case "receipts":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_receipts(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -4206,14 +4459,44 @@ func (ec *executionContext) _Receipt(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = graphql.MarshalString("Receipt")
 		case "id":
 			out.Values[i] = ec._Receipt_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "code":
+			out.Values[i] = ec._Receipt_code(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "amount_total":
+			out.Values[i] = ec._Receipt_amount_total(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "amount_accepted":
+			out.Values[i] = ec._Receipt_amount_accepted(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "client_id":
 			out.Values[i] = ec._Receipt_client_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "state_id":
 			out.Values[i] = ec._Receipt_state_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "currency_id":
 			out.Values[i] = ec._Receipt_currency_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "receipt_articles":
 			out.Values[i] = ec._Receipt_receipt_articles(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4848,6 +5131,50 @@ func (ec *executionContext) marshalNReceipt2ᚖsa_web_serviceᚋinternalᚋmodel
 	return ec._Receipt(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNReceiptArticle2ᚕᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptArticleᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.ReceiptArticle) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNReceiptArticle2ᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptArticle(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
 func (ec *executionContext) marshalNReceiptArticle2ᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptArticle(ctx context.Context, sel ast.SelectionSet, v *models.ReceiptArticle) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -5352,53 +5679,6 @@ func (ec *executionContext) unmarshalOQueryInput2ᚖsa_web_serviceᚋgraphᚋmod
 	}
 	res, err := ec.unmarshalInputQueryInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOReceiptArticle2ᚕᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptArticleᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.ReceiptArticle) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNReceiptArticle2ᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptArticle(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
 }
 
 func (ec *executionContext) unmarshalOReceiptArticleInput2ᚕᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptArticleᚄ(ctx context.Context, v interface{}) ([]*models.ReceiptArticle, error) {

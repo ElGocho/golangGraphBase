@@ -3,8 +3,10 @@ package services
 import (
 	"gorm.io/gorm"
 
+	gql "sa_web_service/graph/model"
 	"sa_web_service/internal/models"
 	"sa_web_service/internal/models/consts"
+	"sa_web_service/internal/models/builders"
 )
 
 func CreateReceipts(tx *gorm.DB, receipts models.Receipts) (models.Receipts, error){
@@ -19,6 +21,24 @@ func CreateReceipts(tx *gorm.DB, receipts models.Receipts) (models.Receipts, err
 	err = receipts.Create(db).Error
 
 	return receipts, err 
+}
+
+func Receipts(tx *gorm.DB, qBuilder *gql.QueryBuilder, pBuilder *models.Builder) (resp models.Receipts){
+	builder := &models.Builder{}
+	priority := models.Priority1
+	db := models.NewSession(tx)	
+
+	if qBuilder != nil{
+		b := builders.ReceiptFromGQL(qBuilder)
+
+		builder.Merge(b, &priority)
+	}
+
+	builder.Merge(pBuilder, &priority)
+
+	resp.Find(db, builder)
+
+	return
 }
 
 func configReceipts(db *gorm.DB, receipts models.Receipts, state consts.State, receiptArticleState consts.State) error {

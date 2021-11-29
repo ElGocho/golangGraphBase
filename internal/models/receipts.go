@@ -26,9 +26,7 @@ type Receipt struct {
 	ReceiptArticles	[]*ReceiptArticle	`gorm:"foreignKey:ReceiptID"`
 }
 
-
 type Receipts	[]*Receipt
-
 
 func (model *Receipt) BeforeCreate(tx *gorm.DB) (err error){
 	model.ID = uuid.New()
