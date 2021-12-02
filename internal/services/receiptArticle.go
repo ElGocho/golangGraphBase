@@ -2,11 +2,46 @@ package services
 
 import (
 	"gorm.io/gorm"
+	"github.com/google/uuid"
 
 	"sa_web_service/internal/models"
 	"sa_web_service/internal/models/consts"
 )
 
+func StatusOffer(db *gorm.DB, id uuid.UUID, status bool) (*models.Receipt,error) {
+	receiptArticle := &models.ReceiptArticle{}
+	state := consts.StateAcceptedReceiptArticle
+
+	builder := &models.Builder{
+		Joins: []string{"Receipt"},
+	}
+
+	receiptArticle.ID = id
+
+	err := receiptArticle.Get(db,builder).Error
+
+	if err != nil {
+		return nil,err
+	}
+
+	if !status {
+		state = consts.StateRejectedReceiptArticle
+	}
+
+	builder = models.SelectIState(state,receiptArticle.TableID,"id") 
+
+	err = receiptArticle.State.Get(db,builder).Error
+
+	if err != nil {
+		return nil,err
+	}
+
+	receiptArticle.StateID = receiptArticle.State.ID
+
+	err = receiptArticle.Save(db, nil)
+
+	return &receiptArticle.Receipt,err
+}
 
 func configReceiptArticles(db *gorm.DB, receiptArticles models.ReceiptArticles, state consts.State) error {
 

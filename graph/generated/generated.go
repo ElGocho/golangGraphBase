@@ -70,6 +70,7 @@ type ComplexityRoot struct {
 		Login          func(childComplexity int, input model.LoginInput) int
 		Ping2          func(childComplexity int) int
 		Register       func(childComplexity int, input model.RegisterInput) int
+		StatusOffer    func(childComplexity int, id uuid.UUID, status bool) int
 		UpdateArticles func(childComplexity int, input model.CUArticleInput) int
 	}
 
@@ -122,6 +123,7 @@ type MutationResolver interface {
 	CreateArticles(ctx context.Context, input model.CUArticleInput) ([]*models.Article, error)
 	UpdateArticles(ctx context.Context, input model.CUArticleInput) ([]*models.Article, error)
 	CreateReceipts(ctx context.Context, input model.CUReceiptInput) ([]*models.Receipt, error)
+	StatusOffer(ctx context.Context, id uuid.UUID, status bool) (*models.Receipt, error)
 }
 type QueryResolver interface {
 	Ping(ctx context.Context) (bool, error)
@@ -262,6 +264,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.Register(childComplexity, args["input"].(model.RegisterInput)), true
+
+	case "Mutation.statusOffer":
+		if e.complexity.Mutation.StatusOffer == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_statusOffer_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.StatusOffer(childComplexity, args["id"].(uuid.UUID), args["status"].(bool)), true
 
 	case "Mutation.updateArticles":
 		if e.complexity.Mutation.UpdateArticles == nil {
@@ -705,6 +719,7 @@ type Mutation {
   updateArticles(input:CUArticleInput!):[Article!]! @isAuthenticated
     
   createReceipts(input:CUReceiptInput!):[Receipt!]! @isAuthenticated
+  statusOffer(id:ID!,status:Boolean!):Receipt! @isAuthenticated
 }
 
 
@@ -773,6 +788,30 @@ func (ec *executionContext) field_Mutation_register_args(ctx context.Context, ra
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_statusOffer_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 uuid.UUID
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	var arg1 bool
+	if tmp, ok := rawArgs["status"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+		arg1, err = ec.unmarshalNBoolean2bool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["status"] = arg1
 	return args, nil
 }
 
@@ -1504,6 +1543,68 @@ func (ec *executionContext) _Mutation_createReceipts(ctx context.Context, field 
 	res := resTmp.([]*models.Receipt)
 	fc.Result = res
 	return ec.marshalNReceipt2ᚕᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_statusOffer(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_statusOffer_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().StatusOffer(rctx, args["id"].(uuid.UUID), args["status"].(bool))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.IsAuthenticated == nil {
+				return nil, errors.New("directive isAuthenticated is not implemented")
+			}
+			return ec.directives.IsAuthenticated(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*models.Receipt); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *sa_web_service/internal/models.Receipt`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.Receipt)
+	fc.Result = res
+	return ec.marshalNReceipt2ᚖsa_web_serviceᚋinternalᚋmodelsᚐReceipt(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Price_id(ctx context.Context, field graphql.CollectedField, obj *models.Price) (ret graphql.Marshaler) {
@@ -4312,6 +4413,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "statusOffer":
+			out.Values[i] = ec._Mutation_statusOffer(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5075,6 +5181,10 @@ func (ec *executionContext) unmarshalNPriceInput2ᚕᚖsa_web_serviceᚋinternal
 		}
 	}
 	return res, nil
+}
+
+func (ec *executionContext) marshalNReceipt2sa_web_serviceᚋinternalᚋmodelsᚐReceipt(ctx context.Context, sel ast.SelectionSet, v models.Receipt) graphql.Marshaler {
+	return ec._Receipt(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNReceipt2ᚕᚖsa_web_serviceᚋinternalᚋmodelsᚐReceiptᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Receipt) graphql.Marshaler {

@@ -13,7 +13,7 @@ const (
 
 	StateActReceiptArticle State = "receipt_article_active"
 	StateAcceptedReceiptArticle	State = "receipt_article_accepted"
-
+	StateRejectedReceiptArticle	State = "receipt_article_rejected"
 
 
 	StateActPrice	bool = true

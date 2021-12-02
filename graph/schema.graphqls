@@ -16,6 +16,7 @@ type Mutation {
   updateArticles(input:CUArticleInput!):[Article!]! @isAuthenticated
     
   createReceipts(input:CUReceiptInput!):[Receipt!]! @isAuthenticated
+  statusOffer(id:ID!,status:Boolean!):Receipt! @isAuthenticated
 }
 
 

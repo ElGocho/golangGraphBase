@@ -63,5 +63,10 @@ func GetWStatesReceiptArticle() []*models.WState{
 			Code: string(consts.StateAcceptedReceiptArticle),
 			Status: true,
 		},
+		&models.WState{
+			Name: consts.StateRejectedReceiptArticle.Name(),
+			Code: string(consts.StateRejectedReceiptArticle),
+			Status: true,
+		},
 	}
 }
