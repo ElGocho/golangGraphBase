@@ -1,5 +1,6 @@
 type Query {
   ping: Boolean!
+  hello: String
 
   users(input:QueryInput):[User!]! @isAuthenticated
   articles(input:QueryInput):[Article!]! @isAuthenticated
@@ -8,6 +9,7 @@ type Query {
 
 type Mutation {
   ping2: Boolean!
+  hello: String
 
   register(input:RegisterInput!):User!
   login(input:LoginInput!):LoginRequest!

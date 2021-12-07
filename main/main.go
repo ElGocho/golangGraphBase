@@ -2,20 +2,20 @@ package main
 
 import (
 	"fmt"
-	"sa_web_service/internal/models"
 	"sa_web_service/internal/database"
 	"sa_web_service/internal/handlers"
 	"sa_web_service/internal/handlers/middlewares"
+	"sa_web_service/internal/helpers"
+	"sa_web_service/internal/models/consts"
 
 	"gorm.io/gorm"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm/logger"
 
 	"github.com/gin-gonic/gin"
+	"github.com/streadway/amqp"
 )
 
 func main() {
-	env := &models.ENV{}
+	env := &helpers.ENV{}
 
 	env.Load(".env")
 
@@ -23,45 +23,34 @@ func main() {
 
 	autoFunc(db, env)
 
+	channel, queues := loadQueues(env)
+
 	fmt.Printf("[MAIN] Subiendo servidor en puerto %s\n",env.PORT)
 
-	serverUp(db,env)
+	serverUp(db,env,channel,queues)
 }
 
-func serverUp(db *gorm.DB, env *models.ENV){
+func serverUp(db *gorm.DB, env *helpers.ENV, channel *amqp.Channel, queues map[string]amqp.Queue){
 	r := gin.Default()
 	
 	r.Use(middlewares.GinContextToContext())
 	r.Use(middlewares.AuthMiddleware())
 
-	r.POST("/query", handlers.GraphQL(db,env))
+	r.POST("/query", handlers.GraphQL(db,env, channel, queues))
 	r.GET("/", handlers.Playground())
 	
 	r.Run()
 }
 
-func getDB (env *models.ENV) (db *gorm.DB){
-	logMode := logger.Error
+func getDB (env *helpers.ENV) (db *gorm.DB){
+	db, err :=  helpers.InitDB(env.DB_USER, env.DB_PASSWORD, env.DB_HOST, env.DB_PORT, env.DB_NAME, env.DB_SSLMODE, env.LOG_MODE)
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s", env.DB_HOST, env.DB_USER, env.DB_PASSWORD, env.DB_NAME, env.DB_PORT, env.DB_SSLMODE)
-
-	if env.LOG_MODE{
-		logMode = logger.Info
-	}
-
-	db,err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logMode),
-	})
-
-	if err != nil {
-		panic(err)
-	}
-
+	helpers.FailOnError(err, "Error al abrir la conexión con la BD")
 
 	return
 }
 
-func autoFunc(db *gorm.DB, env *models.ENV) {
+func autoFunc(db *gorm.DB, env *helpers.ENV) {
 
 	if env.AUTO_MIGRATE {
 		database.ExecAll(db)
@@ -73,3 +62,23 @@ func autoFunc(db *gorm.DB, env *models.ENV) {
 
 }
 
+func loadQueues(env *helpers.ENV) (*amqp.Channel, map[string]amqp.Queue) {
+	_, ch, err := helpers.MQChannel(env.MQ_USER, env.MQ_PASSWORD, env.MQ_HOST, env.MQ_PORT)
+
+	helpers.FailOnError(err, "Error al abrir el canal con rabbitMQ")
+
+	queues := make(map[string]amqp.Queue)
+
+	queues[consts.QueueHello] = declareQueue(consts.QueueHello, ch)
+	queues[consts.QueueEmails] = declareQueue(consts.QueueEmails, ch)
+
+	return ch, queues
+}
+
+func declareQueue(qName string, ch *amqp.Channel) (amqp.Queue){
+	q, err := helpers.MQQueue(qName, ch)
+
+	helpers.FailOnError(err, fmt.Sprintf("Error al declarar cola %s en rabbitMQ", qName))
+
+	return q
+}

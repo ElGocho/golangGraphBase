@@ -1,8 +1,14 @@
 package helpers
 
 import (
+	"log"
 )
 
+func FailOnError(err error, msg string) {
+	if err != nil {
+			log.Fatalf("%s: %s", msg, err)	
+	}
+}
 
 func IsNil(s interface{}) bool{
 	return s == nil

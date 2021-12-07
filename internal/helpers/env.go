@@ -1,4 +1,4 @@
-package models
+package helpers 
 
 import (
 	"os"
@@ -19,6 +19,11 @@ type ENV struct{
 	DB_PORT	string
 	DB_SSLMODE string 
 
+	MQ_USER string
+	MQ_PASSWORD string
+	MQ_HOST string
+	MQ_PORT string
+
 	GIN_MODE string
 	PORT string
 
@@ -38,6 +43,11 @@ func(env *ENV) Load(path string) {
 	env.DB_HOST = os.Getenv("DB_HOST")
 	env.DB_PORT = os.Getenv("DB_PORT")
 	env.DB_SSLMODE = os.Getenv("DB_SSLMODE")
+
+	env.MQ_USER = os.Getenv("MQ_USER")
+	env.MQ_PASSWORD = os.Getenv("MQ_PASSWORD")
+	env.MQ_HOST = os.Getenv("MQ_HOST")
+	env.MQ_PORT = os.Getenv("MQ_PORT")
 
 	env.GIN_MODE = os.Getenv("GIN_MODE")
 	env.PORT = os.Getenv("PORT")

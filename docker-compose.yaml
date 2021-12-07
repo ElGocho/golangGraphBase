@@ -15,6 +15,7 @@ services:
             sh scripts/run.sh" 
     depends_on:
       - "postgreSQL"
+      - "rabbitMQ"
   postgreSQL:
     image: postgres
     hostname: postgres 
@@ -28,6 +29,20 @@ services:
       - POSTGRES_PASSWORD=secret_password
       - POSTGRES_USER=usuario
       - POSTGRES_DB=miBD
+  rabbitMQ:
+    image:  rabbitmq:3.9-management
+    hostname: rabbit
+    restart:  always
+    volumes:
+      - ./pem:/pem
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ./pem/rabbit:/var/lib/rabbitmq
+      - ./pem/rabbitLog:/var/log/rabbitmq
+    depends_on:
+      - "postgreSQL"
 
 
 

@@ -39,10 +39,6 @@ type Pagination struct {
 	Take *int
 }
 
-func NewSession(tx *gorm.DB) *gorm.DB{
-	return tx.Session(&gorm.Session{NewDB: true})
-}
-
 func BuilderORMQuery(tx *gorm.DB, builder *Builder) *gorm.DB{
 	if(builder == nil){
 		return  tx
@@ -115,7 +111,7 @@ func BuilderORMWhere(db *gorm.DB, builder *Builder) *gorm.DB{
 	}
 
 	for _,w := range builder.Where {
-		db = db.Where(w.Condition, w.Params...)	
+		db = db.Where(w.Condition, w.Params)
 	} 
 
 	return db

@@ -67,6 +67,7 @@ type ComplexityRoot struct {
 	Mutation struct {
 		CreateArticles func(childComplexity int, input model.CUArticleInput) int
 		CreateReceipts func(childComplexity int, input model.CUReceiptInput) int
+		Hello          func(childComplexity int) int
 		Login          func(childComplexity int, input model.LoginInput) int
 		Ping2          func(childComplexity int) int
 		Register       func(childComplexity int, input model.RegisterInput) int
@@ -82,6 +83,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Articles func(childComplexity int, input *model.QueryInput) int
+		Hello    func(childComplexity int) int
 		Ping     func(childComplexity int) int
 		Receipts func(childComplexity int, input *model.QueryInput) int
 		Users    func(childComplexity int, input *model.QueryInput) int
@@ -118,6 +120,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	Ping2(ctx context.Context) (bool, error)
+	Hello(ctx context.Context) (*string, error)
 	Register(ctx context.Context, input model.RegisterInput) (*models.User, error)
 	Login(ctx context.Context, input model.LoginInput) (*model.LoginRequest, error)
 	CreateArticles(ctx context.Context, input model.CUArticleInput) ([]*models.Article, error)
@@ -127,6 +130,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Ping(ctx context.Context) (bool, error)
+	Hello(ctx context.Context) (*string, error)
 	Users(ctx context.Context, input *model.QueryInput) ([]*models.User, error)
 	Articles(ctx context.Context, input *model.QueryInput) ([]*models.Article, error)
 	Receipts(ctx context.Context, input *model.QueryInput) ([]*models.Receipt, error)
@@ -234,6 +238,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateReceipts(childComplexity, args["input"].(model.CUReceiptInput)), true
 
+	case "Mutation.hello":
+		if e.complexity.Mutation.Hello == nil {
+			break
+		}
+
+		return e.complexity.Mutation.Hello(childComplexity), true
+
 	case "Mutation.login":
 		if e.complexity.Mutation.Login == nil {
 			break
@@ -321,6 +332,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Articles(childComplexity, args["input"].(*model.QueryInput)), true
+
+	case "Query.hello":
+		if e.complexity.Query.Hello == nil {
+			break
+		}
+
+		return e.complexity.Query.Hello(childComplexity), true
 
 	case "Query.ping":
 		if e.complexity.Query.Ping == nil {
@@ -703,6 +721,7 @@ type ReceiptArticle @goModel(model: "sa_web_service/internal/models.ReceiptArtic
 `, BuiltIn: false},
 	{Name: "graph/schema.graphqls", Input: `type Query {
   ping: Boolean!
+  hello: String
 
   users(input:QueryInput):[User!]! @isAuthenticated
   articles(input:QueryInput):[Article!]! @isAuthenticated
@@ -711,6 +730,7 @@ type ReceiptArticle @goModel(model: "sa_web_service/internal/models.ReceiptArtic
 
 type Mutation {
   ping2: Boolean!
+  hello: String
 
   register(input:RegisterInput!):User!
   login(input:LoginInput!):LoginRequest!
@@ -1275,6 +1295,38 @@ func (ec *executionContext) _Mutation_ping2(ctx context.Context, field graphql.C
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_hello(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().Hello(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_register(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1745,6 +1797,38 @@ func (ec *executionContext) _Query_ping(ctx context.Context, field graphql.Colle
 	res := resTmp.(bool)
 	fc.Result = res
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_hello(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Hello(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_users(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4388,6 +4472,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "hello":
+			out.Values[i] = ec._Mutation_hello(ctx, field)
 		case "register":
 			out.Values[i] = ec._Mutation_register(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -4493,6 +4579,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
+				return res
+			})
+		case "hello":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_hello(ctx, field)
 				return res
 			})
 		case "users":

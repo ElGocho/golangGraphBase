@@ -9,9 +9,7 @@ import (
 )
 
 
-func Login(tx *gorm.DB,email, password string) (string, error) {
-	db := models.NewSession(tx)
-
+func Login(db *gorm.DB,email, password string) (string, error) {
 	builder := &models.Builder{
 		Select: "password,name",
 		Where: []models.Where{

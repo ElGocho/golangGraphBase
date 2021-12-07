@@ -9,9 +9,7 @@ import (
 	"sa_web_service/internal/models/builders"
 )
 
-func CreateArticles(tx *gorm.DB, articles models.Articles) (models.Articles, error){
-	db := models.NewSession(tx)
-
+func CreateArticles(db *gorm.DB, articles models.Articles) (models.Articles, error){
 	err := configArticles(db, articles, consts.StateActArticle, consts.StateActPrice)
 
 	if err != nil {
@@ -23,10 +21,9 @@ func CreateArticles(tx *gorm.DB, articles models.Articles) (models.Articles, err
 	return articles, err 
 }
 
-func Articles(tx *gorm.DB, qBuilder *gql.QueryBuilder, pBuilder *models.Builder) (resp models.Articles){
+func Articles(db *gorm.DB, qBuilder *gql.QueryBuilder, pBuilder *models.Builder) (resp models.Articles){
 	builder := &models.Builder{}
 	priority := models.Priority1
-	db := models.NewSession(tx)	
 
 	if qBuilder != nil{
 		b := builders.ArticleFromGQL(qBuilder)
@@ -41,20 +38,18 @@ func Articles(tx *gorm.DB, qBuilder *gql.QueryBuilder, pBuilder *models.Builder)
 	return
 }
 
-func UpdateArticles(tx *gorm.DB, articles models.Articles) (models.Articles, error){
-	db := models.NewSession(tx)
-
+func UpdateArticles(db *gorm.DB, articles models.Articles) (models.Articles, error){
 	builder := &models.Builder{
 		Omit: []string { "SellerID", "TableID", "CreatedAt","Prices","FTableID","TableItemID"},
 	}
 
-	err := db.Transaction(func(db *gorm.DB) error{
-		err := articles.Save(db, builder)
+	err := articles.Save(db, builder)
 		
-		return err
-	})
+	if err != nil {
+		return nil, err
+	}
 
-	return articles, err
+	return articles, nil
 }
 
 
