@@ -3,8 +3,6 @@ package models
 import (
 	"gorm.io/gorm"
 	"github.com/google/uuid"
-	"github.com/go-ozzo/ozzo-validation"
-	"github.com/go-ozzo/ozzo-validation/is"
 
 	"sa_web_service/internal/helpers"
 )
@@ -31,7 +29,7 @@ type Users []*User
 func (model *User) BeforeCreate(tx *gorm.DB) (err error){
 	model.ID = uuid.New()
 	
-	err = model.Validate()
+	err = Validations.CreateUser(model)
 
 	if err != nil {
 		return 
@@ -66,17 +64,3 @@ func (model *User) Create(db *gorm.DB) *gorm.DB{
 	return db.Create(model)
 }
 
-func (model *User) Validate() (err error){
-	err = validation.ValidateStruct(model,
-		validation.Field(&model.Name, validation.Required, validation.Length(3,50)),
-		validation.Field(&model.Email, validation.Required, is.Email),
-		validation.Field(&model.Password, validation.Required, is.Alphanumeric),
-		validation.Field(&model.Identification, validation.Required, validation.Length(3,50)),
-		validation.Field(&model.Image, validation.Required, is.Alphanumeric),
-		validation.Field(&model.StateID, validation.Required),
-		validation.Field(&model.RoleID, validation.Required),
-		validation.Field(&model.TableID, validation.Required),
-	)
-
-	return err
-}

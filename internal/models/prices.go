@@ -4,7 +4,6 @@ import (
 	_"fmt"
 	"gorm.io/gorm"
 	"github.com/google/uuid"
-	"github.com/go-ozzo/ozzo-validation"
 )
 
 type Price struct {
@@ -27,11 +26,7 @@ type Prices []*Price
 func (model *Price) BeforeCreate(tx *gorm.DB) (err error){
 	model.ID = uuid.New()
 
-	validations := []*validation.FieldRules{
-		validation.Field(&model.FTableID, validation.Required),
-	}
-
-	err = model.Validate(validations...)
+	err = Validations.CreatePrice(model)
 
 	if err != nil {
 		return 
@@ -41,11 +36,7 @@ func (model *Price) BeforeCreate(tx *gorm.DB) (err error){
 }
 
 func (model *Price) BeforeSave(tx *gorm.DB) (err error){
-	saveValidations := []*validation.FieldRules{
-		validation.Field(&model.ID, validation.Required),
-	}
-	
-	err = model.Validate(saveValidations...)
+	err = Validations.SavePrice(model)
 
 	if err != nil {
 		return 
@@ -84,18 +75,6 @@ func (model Prices) Save(tx *gorm.DB, builder *Builder) error{
 	}
 
 	return nil
-}
-
-func (model *Price) Validate(validations ...*validation.FieldRules) (err error){
-	validations = append(validations, 
-		validation.Field(&model.Amount, validation.Required, validation.Min(0.01)),
-		validation.Field(&model.TableItemID, validation.Required),
-		validation.Field(&model.CurrencyID, validation.Required),
-	)
-
-	err = validation.ValidateStruct(model, validations...)
-
-	return err
 }
 
 

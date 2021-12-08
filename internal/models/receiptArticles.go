@@ -3,7 +3,6 @@ package models
 import (
 	"gorm.io/gorm"
 	"github.com/google/uuid"
-	"github.com/go-ozzo/ozzo-validation"
 )
 
 type ReceiptArticle struct {
@@ -29,13 +28,7 @@ type ReceiptArticles	[]*ReceiptArticle
 func (model *ReceiptArticle) BeforeCreate(tx *gorm.DB) (err error){
 	model.ID = uuid.New()
 	
-	validations := []*validation.FieldRules{
-		validation.Field(&model.ReceiptID, validation.Required),
-		validation.Field(&model.ArticleID, validation.Required),
-		validation.Field(&model.TableID, validation.Required),
-	}
-
-	err = model.Validate(validations...)
+	err = Validations.CreateReceiptArticle(model)
 
 	if err != nil {
 		return 
@@ -45,11 +38,7 @@ func (model *ReceiptArticle) BeforeCreate(tx *gorm.DB) (err error){
 }
 
 func (model *ReceiptArticle) BeforeSave(tx *gorm.DB) (err error){
-	validations := []*validation.FieldRules{
-		validation.Field(&model.ID, validation.Required),
-	}
-	
-	err = model.Validate(validations...)
+	err = Validations.SaveReceiptArticle(model)
 
 	if err != nil {
 		return 
@@ -97,14 +86,3 @@ func (model *ReceiptArticles) Create(db *gorm.DB) *gorm.DB{
 	return db.Create(model)
 }
 
-func (model *ReceiptArticle) Validate(validations ...*validation.FieldRules) (err error){
-
-	validations = append(validations, 
-		validation.Field(&model.PriceID, validation.Required),
-		validation.Field(&model.StateID, validation.Required),
-	)
-
-	err = validation.ValidateStruct(model, validations...)
-
-	return err
-}

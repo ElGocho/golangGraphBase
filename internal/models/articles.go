@@ -4,7 +4,6 @@ import (
 	_"fmt"
 	"gorm.io/gorm"
 	"github.com/google/uuid"
-	"github.com/go-ozzo/ozzo-validation"
 
 )
 
@@ -30,12 +29,7 @@ type Articles []*Article
 func (model *Article) BeforeCreate(tx *gorm.DB) (err error){
 	model.ID = uuid.New()
 	
-	validations := []*validation.FieldRules{
-		validation.Field(&model.TableID, validation.Required),
-		validation.Field(&model.SellerID, validation.Required),
-	}
-
-	err = model.Validate(validations...)
+	err = Validations.CreateArticle(model)
 
 	if err != nil {
 		return 
@@ -45,11 +39,7 @@ func (model *Article) BeforeCreate(tx *gorm.DB) (err error){
 }
 
 func (model *Article) BeforeSave(tx *gorm.DB) (err error){
-	validations := []*validation.FieldRules{
-		validation.Field(&model.ID, validation.Required),
-	}
-	
-	err = model.Validate(validations...)
+	err = Validations.SaveArticle(model)
 
 	if err != nil {
 		return 
@@ -103,19 +93,4 @@ func (model *Articles) Create(db *gorm.DB) *gorm.DB{
 	return db.Create(model)
 }
 
-func (model *Article) Validate(validations ...*validation.FieldRules) (err error){
-
-	var minCant uint = 1
-
-	validations = append(validations, 
-		validation.Field(&model.Name, validation.Required, validation.Length(3,50)),
-		validation.Field(&model.Cant, validation.Required, validation.Min(minCant)),
-		validation.Field(&model.StateID, validation.Required),
-		validation.Field(&model.Prices, validation.Required),
-	)
-
-	err = validation.ValidateStruct(model, validations...)
-
-	return err
-}
 
