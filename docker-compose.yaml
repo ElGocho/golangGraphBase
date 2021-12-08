@@ -16,6 +16,18 @@ services:
     depends_on:
       - "postgreSQL"
       - "rabbitMQ"
+  mailsMicroservice:
+    image: golang:1.17.2-alpine
+    volumes:
+      - ./:/app
+      - ./pem/pkg:/go/pkg
+    command: >
+      sh -c "cd /app && 
+            sh scripts/buildMailsMicroservice.sh &&
+            sh scripts/runMailsMicroservice.sh" 
+    depends_on:
+      - "postgreSQL"
+      - "rabbitMQ"
   postgreSQL:
     image: postgres
     hostname: postgres 
@@ -31,6 +43,7 @@ services:
       - POSTGRES_DB=miBD
   rabbitMQ:
     image:  rabbitmq:3.9-management
+    container_name: 'SYS_RABBIT_MQ'
     hostname: rabbit
     restart:  always
     volumes:
@@ -40,7 +53,6 @@ services:
       - "15672:15672"
     volumes:
       - ./pem/rabbit:/var/lib/rabbitmq
-      - ./pem/rabbitLog:/var/log/rabbitmq
     depends_on:
       - "postgreSQL"
 

@@ -3,6 +3,6 @@
 
 echo "Corriendo el servicio"
 
-builds/sa_service 2>> logs/log.txt
+builds/mails_microservice 2>> logs/logMailsMicroservice.txt
 
 
