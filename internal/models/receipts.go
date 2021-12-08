@@ -3,7 +3,6 @@ package models
 import (
 	"gorm.io/gorm"
 	"github.com/google/uuid"
-	"github.com/go-ozzo/ozzo-validation"
 
 )
 
@@ -43,14 +42,7 @@ func (model *Receipt) BeforeCreate(tx *gorm.DB) (err error){
 		return 
 	}
 
-	validations := []*validation.FieldRules{
-		validation.Field(&model.AmountTotal,validation.Min(0.01)),
-		validation.Field(&model.Code,validation.Required),
-		validation.Field(&model.TableID, validation.Required),
-		validation.Field(&model.ClientID, validation.Required),
-	}
-
-	err = model.Validate(validations...)
+	err = Validations.CreateReceipt(model)
 
 	if err != nil {
 		return 
@@ -60,11 +52,7 @@ func (model *Receipt) BeforeCreate(tx *gorm.DB) (err error){
 }
 
 func (model *Receipt) BeforeSave(tx *gorm.DB) (err error){
-	validations := []*validation.FieldRules{
-		validation.Field(&model.ID, validation.Required),
-	}
-	
-	err = model.Validate(validations...)
+	err = Validations.SaveReceipt(model)
 
 	if err != nil {
 		return 
@@ -116,18 +104,4 @@ func (model Receipts) Save(tx *gorm.DB, builder *Builder) error{
 
 func (model *Receipts) Create(db *gorm.DB) *gorm.DB{
 	return db.Create(model)
-}
-
-func (model *Receipt) Validate(validations ...*validation.FieldRules) (err error){
-
-	validations = append(validations, 
-		validation.Field(&model.AmountTotal, validation.Min(0.01)),
-		validation.Field(&model.StateID, validation.Required),
-		validation.Field(&model.CurrencyID, validation.Required),
-		validation.Field(&model.ReceiptArticles, validation.Required),
-	)
-
-	err = validation.ValidateStruct(model, validations...)
-
-	return err
 }

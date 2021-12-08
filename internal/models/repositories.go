@@ -1,5 +1,5 @@
 package models 
 
-type repository	struct {}
+type repository	struct{}
 
 var Repositories *repository = &repository{}

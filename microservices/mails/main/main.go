@@ -17,7 +17,7 @@ import (
 
 
 func main(){
-	log.Println("Iniciando Microservicio: ", consts.MicroserviceEmails)
+	log.Println("Iniciando Microservicio: ", consts.MicroserviceMails)
 
 	env := &helpers.ENV{}
 

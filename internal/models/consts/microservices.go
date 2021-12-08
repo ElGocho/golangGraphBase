@@ -1,5 +1,5 @@
 package consts
 
 const (
-	MicroserviceEmails string = "Emails"
+	MicroserviceMails string = "Mails"
 )
