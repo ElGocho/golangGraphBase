@@ -45,7 +45,7 @@ services:
       - POSTGRES_USER=usuario
       - POSTGRES_DB=miBD
   rabbitMQ:
-    image:  rabbitmq:3.9-management
+    image:  rabbitmq:3.9-management-alpine
     container_name: 'SYS_RABBIT_MQ'
     hostname: rabbit
     restart:  always
