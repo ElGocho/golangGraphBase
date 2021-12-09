@@ -3,6 +3,7 @@ version: "3.7"
 services:
   sysAppService:
     image: golang:1.17.2-alpine
+    container_name: 'SYS_APP_SERVICE'
     ports:
       - 8080:8080
     volumes:
@@ -18,6 +19,7 @@ services:
       - "rabbitMQ"
   mailsMicroservice:
     image: golang:1.17.2-alpine
+    container_name: 'SYS_MAIL_MICROSERVICE'
     volumes:
       - ./:/app
       - ./pem/pkg:/go/pkg
@@ -30,6 +32,7 @@ services:
       - "rabbitMQ"
   postgreSQL:
     image: postgres
+    container_name: 'SYS_POSTGRESQL'
     hostname: postgres 
     restart: always
     volumes:
